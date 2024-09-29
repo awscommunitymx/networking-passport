@@ -5,16 +5,18 @@ import {
     Container,
     Divider,
     Heading,
-    HStack,
-    Icon,
     Skeleton,
     SkeletonText,
     Text,
     useColorModeValue,
+    useToast,
     VStack
 } from '@chakra-ui/react';
 import {BriefcaseIcon, DownloadIcon, GlobeIcon, LinkedinIcon, Mail, PhoneIcon} from 'lucide-react';
 import {Profile} from "../types/profile.ts";
+import Cookies from 'js-cookie';
+import NavBar from "./NavBar.tsx";
+import ProfileItem from "./ProfileItem.tsx";
 
 const simulateAPICall = (): Promise<Profile> => {
     return new Promise((resolve) => {
@@ -32,10 +34,21 @@ const simulateAPICall = (): Promise<Profile> => {
     });
 };
 
+const simulateRegisterVisit = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(Math.random() > 0.5); // Simulates a 50% success rate
+        }, 2000);
+    });
+};
+
 const ProfilePage: React.FC = () => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSponsor, setIsSponsor] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
 
+    const toast = useToast();
     const bgColor = useColorModeValue('gray.50', 'gray.800');
     const cardBgColor = useColorModeValue('white', 'gray.700');
 
@@ -46,23 +59,50 @@ const ProfilePage: React.FC = () => {
             setIsLoading(false);
         }
         fetchProfile();
+
+        // Check for sponsor token cookie
+        const sponsorToken = Cookies.get('sponsorToken');
+        setIsSponsor(!!sponsorToken);
     }, []);
 
     const downloadVCF = () => {
         alert('Downloading VCF file...');
     };
 
-    const ProfileItem: React.FC<{ icon: React.ElementType; label: string; value: string }> = ({icon, label, value}) => (
-        <HStack>
-            <Icon as={icon} color="blue.500"/>
-            <Text fontWeight="bold">{label}:</Text>
-            {isLoading ? <Skeleton height="20px" width="150px"/> : <Text>{value}</Text>}
-        </HStack>
-    );
+    const registerVisit = async () => {
+        setIsRegistering(true);
+        const success = await simulateRegisterVisit();
+        setIsRegistering(false);
+
+        toast({
+            title: success ? 'Visita registrada' : 'Error',
+            description: success ? 'Se ha registrado la visita al stand con éxito' : 'Ha ocurrido un error al registrar la visita',
+            status: success ? 'success' : 'error',
+            duration: 3000,
+            isClosable: true,
+        });
+    };
+
 
     return (
-        <Box bg={bgColor} minHeight="100vh" py={10}>
-            <Container maxW="container.md">
+        <Box bg={bgColor} minHeight="100vh">
+            {isSponsor && (
+                <NavBar/>
+            )}
+
+            <Container maxW="container.md" py={10}>
+                {isSponsor && (
+                    <Button
+                        colorScheme="green"
+                        onClick={registerVisit}
+                        isLoading={isRegistering}
+                        mb={6}
+                        width="100%"
+                    >
+                        Register Visit
+                    </Button>
+                )}
+
                 <VStack
                     spacing={6}
                     align="stretch"
@@ -86,11 +126,14 @@ const ProfilePage: React.FC = () => {
                     <Divider/>
 
                     <VStack align="stretch" spacing={4}>
-                        <ProfileItem icon={BriefcaseIcon} label="Company" value={profile?.company || ''}/>
-                        <ProfileItem icon={Mail} label="Email" value={profile?.email || ''}/>
-                        <ProfileItem icon={PhoneIcon} label="Phone" value={profile?.phone || ''}/>
-                        <ProfileItem icon={GlobeIcon} label="Website" value={profile?.website || ''}/>
-                        <ProfileItem icon={LinkedinIcon} label="LinkedIn" value={profile?.linkedin || ''}/>
+                        <ProfileItem icon={BriefcaseIcon} label="Company" value={profile?.company || ''}
+                                     isLoading={isLoading}/>
+                        <ProfileItem icon={Mail} label="Email" value={profile?.email || ''} isLoading={isLoading}/>
+                        <ProfileItem icon={PhoneIcon} label="Phone" value={profile?.phone || ''} isLoading={isLoading}/>
+                        <ProfileItem icon={GlobeIcon} label="Website" value={profile?.website || ''}
+                                     isLoading={isLoading}/>
+                        <ProfileItem icon={LinkedinIcon} label="LinkedIn" value={profile?.linkedin || ''}
+                                     isLoading={isLoading}/>
                     </VStack>
 
                     <Button
