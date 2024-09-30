@@ -5,6 +5,63 @@
     <link href="/logo.png" rel="icon" type="image/svg+xml"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>AWS Community Day México 2024</title>
+    <script>
+        // Función para establecer una cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        // Función para obtener una cookie
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // Inicializa el agente en la carga de la página.
+        const fpPromise = import('https://awscommunity.mx/VEIljBrUWj7hmsD1/UZH4gGXwM3TIkm7Z?apiKey=xlUt8pmErkBdwDbetxgI')
+            .then(FingerprintJS => FingerprintJS.load({
+                endpoint: [
+                    "https://awscommunity.mx/VEIljBrUWj7hmsD1/y9bRnWRbhMEDfPIL",
+                    FingerprintJS.defaultEndpoint
+                ]
+            }))
+
+        // Obtiene el visitorId cuando lo necesites.
+        fpPromise
+            .then(fp => {
+                // Primero, verifica si el visitorId está en la cookie
+                let visitorId = getCookie('visitorId');
+                if (visitorId) {
+                    console.log('visitorId obtenido de la cookie:', visitorId);
+                    return visitorId;
+                } else {
+                    // Si no está en la cookie, obtén un nuevo visitorId
+                    return fp.get().then(result => {
+                        visitorId = result.visitorId;
+                        // Almacena el visitorId en una cookie que expira en 30 días
+                        setCookie('visitorId', visitorId, 30);
+                        console.log('Nuevo visitorId obtenido y almacenado en cookie:', visitorId);
+                        return visitorId;
+                    });
+                }
+            })
+            .then(visitorId => {
+                // Aquí puedes usar el visitorId como lo necesites
+                console.log('visitorId final:', visitorId);
+            });
+    </script>
 </head>
 <body>
 <div id="root"></div>
