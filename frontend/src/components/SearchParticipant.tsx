@@ -80,7 +80,7 @@ const SearchParticipant: React.FC = () => {
 
 
     const handleSearch = () => {
-        navigate(`/search-participant?event_code=${eventCode}`);
+        navigate(`/search-participant?short_id=${eventCode}`);
     };
 
     const handleRegisterVisit = async () => {
