@@ -134,7 +134,10 @@ const SearchParticipant: React.FC = () => {
                 <Box maxWidth="600px" margin="auto" mt={8}>
                     <VStack spacing={4} align="stretch">
                         <FormControl>
-                            <FormLabel>Event Code</FormLabel>
+                            <FormLabel>
+                                Event Code
+                                <Text fontSize='xs' color="gray">You can find the event code under the QR code</Text>
+                            </FormLabel>
                             <Input
                                 value={eventCode}
                                 onChange={(e) => setEventCode(e.target.value)}
@@ -162,7 +165,10 @@ const SearchParticipant: React.FC = () => {
                                     {participantData.first_name} {participantData.last_name}
                                 </Text>
                                 <FormControl>
-                                    <FormLabel>Notes</FormLabel>
+                                    <FormLabel>
+                                        Notes
+                                        <Text fontSize='xs' color="gray">You can add notes for your reference</Text>
+                                    </FormLabel>
                                     <Textarea
                                         value={notes}
                                         onChange={(e) => setNotes(e.target.value)}
@@ -172,6 +178,7 @@ const SearchParticipant: React.FC = () => {
                                 <Button
                                     onClick={handleRegisterVisit}
                                     isLoading={isLoading}
+                                    colorScheme="green"
                                 >
                                     {participantData.message === "Already stamped" ? "Modify notes" : "Register Visit"}
                                 </Button>
