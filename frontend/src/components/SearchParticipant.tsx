@@ -63,6 +63,12 @@ const SearchParticipant: React.FC = () => {
     };
 
     useEffect(() => {
+        const token = localStorage.getItem('sponsorToken');
+        if (!token) {
+            navigate('/sponsor-login');
+            return;
+        }
+
         const params = new URLSearchParams(location.search);
         const code = params.get('event_code');
         if (code && !urlReady) {
