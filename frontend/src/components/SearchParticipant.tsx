@@ -24,7 +24,10 @@ interface ParticipantData {
     notes: string;
     message: string;
     timestamp: string;
+    role: string;
+    company: string;
 }
+
 
 const SearchParticipant: React.FC = () => {
     const [eventCode, setEventCode] = useState<string>('');
@@ -135,13 +138,14 @@ const SearchParticipant: React.FC = () => {
                     <VStack spacing={4} align="stretch">
                         <FormControl>
                             <FormLabel>
-                                Event Code
-                                <Text fontSize='xs' color="gray">You can find the event code under the QR code.</Text>
+                                Participant Code
+                                <Text fontSize='xs' color="gray">You can find the participant code under the QR
+                                    code.</Text>
                             </FormLabel>
                             <Input
                                 value={eventCode}
                                 onChange={(e) => setEventCode(e.target.value)}
-                                placeholder="Enter event code"
+                                placeholder="Enter participant code"
                             />
                         </FormControl>
                         <Button onClick={handleSearch} isLoading={isLoading}>
@@ -164,6 +168,7 @@ const SearchParticipant: React.FC = () => {
                                 <Text fontSize="xl" fontWeight="bold">
                                     {participantData.first_name} {participantData.last_name}
                                 </Text>
+                                <Text>{participantData.role} at {participantData.company}</Text>
                                 <FormControl>
                                     <FormLabel>
                                         Notes
