@@ -30,7 +30,8 @@ interface Profile {
     company: string;
     social_links: { name: string; url: string }[];
     vcard: string;
-    email: string;
+    email?: string;
+    phone?: string;
 }
 
 const ProfilePage: React.FC = () => {
@@ -120,9 +121,16 @@ const ProfilePage: React.FC = () => {
                                 <Text fontSize="lg" color="gray.500" textAlign="center">{profile.role}</Text>
                                 <Divider/>
                                 <VStack align="stretch" spacing={4}>
-                                    <ProfileItem icon={BriefcaseIcon} label="Company" value={profile.company}
+                                    <ProfileItem icon={BriefcaseIcon} label="Compañia" value={profile.company}
                                                  isLoading={isLoading}/>
-                                    <ProfileItem icon={Mail} label="Email" value={profile.email} isLoading={isLoading}/>
+                                    {profile.email && (
+                                        <ProfileItem icon={Mail} label="Email" value={profile.email}
+                                                     isLoading={isLoading}/>
+                                    )}
+                                    {profile.phone && (
+                                        <ProfileItem icon={Mail} label="Teléfono" value={profile.phone}
+                                                     isLoading={isLoading}/>
+                                    )}
                                     {profile.social_links.map((link, index) => (
                                         <ProfileItem
                                             key={index}
@@ -161,7 +169,7 @@ const ProfilePage: React.FC = () => {
                         <ModalBody>
                             <Input
                                 type="password"
-                                placeholder="Enter 4-digit PIN"
+                                placeholder="Ingresa el PIN de 4 dígitos"
                                 value={pin}
                                 onChange={(e) => setPin(e.target.value)}
                                 maxLength={4}
