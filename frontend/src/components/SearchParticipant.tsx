@@ -164,10 +164,10 @@ const SearchParticipant: React.FC = () => {
                                         </VStack>
                                     </Alert>
                                 )}
-                                <Text fontSize="xl" fontWeight="bold">
-                                    {participantData.first_name} {participantData.last_name}
-                                </Text>
                                 <Box>
+                                    <Text fontSize="xl" fontWeight="bold">
+                                        {participantData.first_name} {participantData.last_name}
+                                    </Text>
                                     <Text>
                                         {participantData.role}
                                     </Text>
