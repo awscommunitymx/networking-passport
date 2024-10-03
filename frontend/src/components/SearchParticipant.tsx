@@ -136,7 +136,7 @@ const SearchParticipant: React.FC = () => {
                         <FormControl>
                             <FormLabel>
                                 Event Code
-                                <Text fontSize='xs' color="gray">You can find the event code under the QR code</Text>
+                                <Text fontSize='xs' color="gray">You can find the event code under the QR code.</Text>
                             </FormLabel>
                             <Input
                                 value={eventCode}
@@ -167,7 +167,7 @@ const SearchParticipant: React.FC = () => {
                                 <FormControl>
                                     <FormLabel>
                                         Notes
-                                        <Text fontSize='xs' color="gray">You can add notes for your reference</Text>
+                                        <Text fontSize='xs' color="gray">You can add notes for your reference.</Text>
                                     </FormLabel>
                                     <Textarea
                                         value={notes}
