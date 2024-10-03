@@ -167,7 +167,8 @@ const SearchParticipant: React.FC = () => {
                                 <FormControl>
                                     <FormLabel>
                                         Notes
-                                        <Text fontSize='xs' color="gray">You can add notes for your reference.</Text>
+                                        <Text fontSize='xs' color="gray">Enter key details here for follow-up on this
+                                            lead.</Text>
                                     </FormLabel>
                                     <Textarea
                                         value={notes}
