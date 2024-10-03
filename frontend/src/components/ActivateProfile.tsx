@@ -5,6 +5,8 @@ import {
     FormControl,
     FormLabel,
     Heading,
+    HStack,
+    IconButton,
     Input,
     Modal,
     ModalBody,
@@ -12,15 +14,18 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    Select,
     Switch,
+    Text,
     useToast,
     VStack
 } from "@chakra-ui/react";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {ValidationResponse} from "../types/validation.ts";
 import BASE_API_URL from "../base-api.ts";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import {AddIcon, DeleteIcon} from '@chakra-ui/icons';
 
 interface SocialLink {
     name: string;
@@ -51,7 +56,14 @@ interface UserProfile {
     gender: string;
     age_range: string;
     area_of_interest: string;
+    first_name: string;
+    last_name: string;
+    role: string;
 }
+
+const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"];
+const ageRangeOptions = ["18-24", "25-34", "35-44", "45-54", "55+"];
+const areaOfInterestOptions = ["Technology", "Business", "Healthcare", "Education", "Arts", "Other"];
 
 const ActivateProfile = () => {
     const [shortID, setShortID] = useState('');
@@ -59,6 +71,7 @@ const ActivateProfile = () => {
     const [unlockValue, setUnlockValue] = useState('');
     const [unlockKey, setUnlockKey] = useState('');
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [newSocialLink, setNewSocialLink] = useState<SocialLink>({name: '', url: ''});
 
     const navigate = useNavigate();
     const toast = useToast();
@@ -77,7 +90,10 @@ const ActivateProfile = () => {
             social_links: response.data.social_links,
             gender: '',
             age_range: '',
-            area_of_interest: ''
+            area_of_interest: '',
+            first_name: response.data.first_name,
+            last_name: response.data.last_name,
+            role: response.data.role
         });
     }
 
@@ -116,29 +132,65 @@ const ActivateProfile = () => {
         );
     }, [navigate, shortID]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value, type, checked} = e.target;
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const {name, value, type} = e.target;
         setUserProfile(prev => {
             if (!prev) return null;
             return {
                 ...prev,
-                [name]: type === 'checkbox' ? checked : value
+                [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
             };
         });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically send the updated profile to your backend
-        console.log("Submitting profile:", userProfile);
-        // Add your submission logic here
+        const response = await axios.post(`${BASE_API_URL}/attendee`, userProfile)
+        if (response.status === 200) {
+            toast({
+                title: 'Success',
+                description: 'Profile saved successfully',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+            navigate(`/view-profile?short_id=${shortID}`);
+        } else {
+            toast({
+                title: 'Error',
+                description: 'Failed to save profile',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const handleAddSocialLink = () => {
+        if (newSocialLink.name && newSocialLink.url && userProfile) {
+            setUserProfile({
+                ...userProfile,
+                social_links: [...userProfile.social_links, newSocialLink]
+            });
+            setNewSocialLink({name: '', url: ''});
+        }
+    };
+
+    const handleRemoveSocialLink = (index: number) => {
+        if (userProfile) {
+            const updatedLinks = userProfile.social_links.filter((_, i) => i !== index);
+            setUserProfile({
+                ...userProfile,
+                social_links: updatedLinks
+            });
+        }
     };
 
     return (
         <>
             <NavBar/>
-            <Container>
-                <Heading>Activate Profile</Heading>
+            <Container maxW="container.md">
+                <Heading mb={6}>Activate Profile</Heading>
                 <Modal isOpen={unlockKey === ""} onClose={() => {
                 }}>
                     <ModalOverlay/>
@@ -164,8 +216,16 @@ const ActivateProfile = () => {
                     <form onSubmit={handleSubmit}>
                         <VStack spacing={4} align="stretch">
                             <FormControl>
+                                <FormLabel>Name</FormLabel>
+                                <Text>{`${userProfile.first_name} ${userProfile.last_name}`}</Text>
+                            </FormControl>
+                            <FormControl>
                                 <FormLabel>Company</FormLabel>
-                                <Input name="company" value={userProfile.company} onChange={handleInputChange}/>
+                                <Text>{userProfile.company}</Text>
+                            </FormControl>
+                            <FormControl>
+                                <FormLabel>Role</FormLabel>
+                                <Text>{userProfile.role}</Text>
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Email</FormLabel>
@@ -195,16 +255,62 @@ const ActivateProfile = () => {
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Gender</FormLabel>
-                                <Input name="gender" value={userProfile.gender} onChange={handleInputChange}/>
+                                <Select name="gender" value={userProfile.gender} onChange={handleInputChange}>
+                                    <option value="">Select Gender</option>
+                                    {genderOptions.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </Select>
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Age Range</FormLabel>
-                                <Input name="age_range" value={userProfile.age_range} onChange={handleInputChange}/>
+                                <Select name="age_range" value={userProfile.age_range} onChange={handleInputChange}>
+                                    <option value="">Select Age Range</option>
+                                    {ageRangeOptions.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </Select>
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Area of Interest</FormLabel>
-                                <Input name="area_of_interest" value={userProfile.area_of_interest}
-                                       onChange={handleInputChange}/>
+                                <Select name="area_of_interest" value={userProfile.area_of_interest}
+                                        onChange={handleInputChange}>
+                                    <option value="">Select Area of Interest</option>
+                                    {areaOfInterestOptions.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl>
+                                <FormLabel>Social Links</FormLabel>
+                                {userProfile.social_links.map((link, index) => (
+                                    <HStack key={index} mb={2}>
+                                        <Text>{link.name}: {link.url}</Text>
+                                        <IconButton
+                                            aria-label="Remove social link"
+                                            icon={<DeleteIcon/>}
+                                            onClick={() => handleRemoveSocialLink(index)}
+                                            size="sm"
+                                        />
+                                    </HStack>
+                                ))}
+                                <HStack>
+                                    <Input
+                                        placeholder="Platform"
+                                        value={newSocialLink.name}
+                                        onChange={(e) => setNewSocialLink({...newSocialLink, name: e.target.value})}
+                                    />
+                                    <Input
+                                        placeholder="URL"
+                                        value={newSocialLink.url}
+                                        onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
+                                    />
+                                    <IconButton
+                                        aria-label="Add social link"
+                                        icon={<AddIcon/>}
+                                        onClick={handleAddSocialLink}
+                                    />
+                                </HStack>
                             </FormControl>
                             <Button type="submit" colorScheme="blue">
                                 Save Profile

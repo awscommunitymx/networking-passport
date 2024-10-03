@@ -50,14 +50,16 @@ const ProfilePage: React.FC = () => {
         }
         const urlParams = new URLSearchParams(window.location.search);
         const short_id = urlParams.get('short_id');
+        console.log(short_id);
         if (short_id) {
             setShortID(short_id);
+            console.log("fetching activation status with short_id: ", short_id);
+            fetchActivationStatus().then((response) => {
+                if (!response.initialized) {
+                    navigate(`/activate?short_id=${short_id}&method=${response.method}`);
+                }
+            });
         }
-        fetchActivationStatus().then((response) => {
-            if (!response.initialised) {
-                navigate(`/activate?short_id=${short_id}&method=${response.method}`);
-            }
-        });
 
     }, [navigate, shortID]);
 
