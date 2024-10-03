@@ -3,7 +3,7 @@ import {createRoot} from 'react-dom/client'
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import ProfilePage from "./components/ProfilePage.tsx";
 import {ChakraProvider} from "@chakra-ui/react";
-import SponsorPage from "./components/SponsorPage.tsx";
+import SponsorLogin from "./components/SponsorLogin.tsx";
 
 const router = createBrowserRouter([
     {
@@ -11,8 +11,8 @@ const router = createBrowserRouter([
         element: <ProfilePage/>,
     },
     {
-        path: "/sponsor",
-        element: <SponsorPage/>,
+        path: "/sponsor-login",
+        element: <SponsorLogin/>,
     }
 ]);
 
