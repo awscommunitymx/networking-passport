@@ -8,7 +8,7 @@ import SearchParticipant from "./components/SearchParticipant.tsx";
 
 const router = createBrowserRouter([
     {
-        path: "/",
+        path: "/view-profile",
         element: <ProfilePage/>,
     },
     {
