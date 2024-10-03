@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Alert,
     Box,
     Button,
     Container,
@@ -144,6 +145,17 @@ const SearchParticipant: React.FC = () => {
 
                         {participantData && (
                             <>
+                                {participantData.message === "Already stamped" && (
+                                    <Alert status="warning">
+                                        <VStack alignItems={"start"}>
+                                            <Text>This participant has already been stamped.</Text>
+                                            {participantData.timestamp && (
+                                                <Text>Last
+                                                    scanned: {new Date(participantData.timestamp).toLocaleString()}</Text>
+                                            )}
+                                        </VStack>
+                                    </Alert>
+                                )}
                                 <Text fontSize="xl" fontWeight="bold">
                                     {participantData.first_name} {participantData.last_name}
                                 </Text>
@@ -161,12 +173,6 @@ const SearchParticipant: React.FC = () => {
                                 >
                                     {participantData.message === "Already stamped" ? "Modify notes" : "Register Visit"}
                                 </Button>
-                                {participantData.message === "Already stamped" && (
-                                    <Text color="red.500">Code scanned previously</Text>
-                                )}
-                                {participantData.timestamp && (
-                                    <Text>Last scanned: {new Date(participantData.timestamp).toLocaleString()}</Text>
-                                )}
                             </>
                         )}
                     </VStack>
