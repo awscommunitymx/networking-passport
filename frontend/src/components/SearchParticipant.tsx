@@ -28,7 +28,6 @@ interface ParticipantData {
     company: string;
 }
 
-
 const SearchParticipant: React.FC = () => {
     const [eventCode, setEventCode] = useState<string>('');
     const [urlReady, setUrlReady] = useState<boolean>(false);
@@ -168,7 +167,10 @@ const SearchParticipant: React.FC = () => {
                                 <Text fontSize="xl" fontWeight="bold">
                                     {participantData.first_name} {participantData.last_name}
                                 </Text>
-                                <Text>{participantData.role} at {participantData.company}</Text>
+                                <Text>
+                                    {participantData.role}
+                                </Text>
+                                <Text><b>{participantData.company}</b></Text>
                                 <FormControl>
                                     <FormLabel>
                                         Notes
