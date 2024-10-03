@@ -6,11 +6,16 @@ import {ChakraProvider} from "@chakra-ui/react";
 import SponsorLogin from "./components/SponsorLogin.tsx";
 import SearchParticipant from "./components/SearchParticipant.tsx";
 import RedirectHandler from "./components/RedirectHandler.tsx";
+import ActivateProfile from "./components/ActivateProfile.tsx";
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <RedirectHandler/>,
+    },
+    {
+        path: "/activate",
+        element: <ActivateProfile/>,
     },
     {
         path: "/view-profile",

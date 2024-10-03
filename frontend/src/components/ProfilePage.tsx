@@ -24,22 +24,9 @@ import BASE_API_URL from "../base-api.ts";
 import NavBar from "./NavBar.tsx";
 import Cookies from 'js-cookie';
 import {useNavigate} from "react-router-dom";
+import {ValidationResponse} from "../types/validation.ts";
+import {Profile} from "../types/profile.ts";
 
-interface Profile {
-    first_name: string;
-    last_name: string;
-    role: string;
-    company: string;
-    social_links: { name: string; url: string }[];
-    vcard: string;
-    email?: string;
-    phone?: string;
-}
-
-interface ValidationResponse {
-    method: "both" | "email";
-    initialised: boolean;
-}
 
 const ProfilePage: React.FC = () => {
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -190,7 +177,7 @@ const ProfilePage: React.FC = () => {
                         <ModalHeader>Ingresa el PIN</ModalHeader>
                         <ModalBody>
                             <Input
-                                type="password"
+                                type="number"
                                 placeholder="Ingresa el PIN de 4 dígitos"
                                 value={pin}
                                 onChange={(e) => setPin(e.target.value)}
