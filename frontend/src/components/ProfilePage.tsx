@@ -23,6 +23,7 @@ import ProfileItem from "./ProfileItem.tsx";
 import BASE_API_URL from "../base-api.ts";
 import NavBar from "./NavBar.tsx";
 import Cookies from 'js-cookie';
+import {useNavigate} from "react-router-dom";
 
 interface Profile {
     first_name: string;
@@ -33,6 +34,11 @@ interface Profile {
     vcard: string;
     email?: string;
     phone?: string;
+}
+
+interface ValidationResponse {
+    method: "both" | "email";
+    initialised: boolean;
 }
 
 const ProfilePage: React.FC = () => {
@@ -47,13 +53,26 @@ const ProfilePage: React.FC = () => {
 
     const [shortID, setShortID] = useState('');
 
+    const navigate = useNavigate();
+
+
     useEffect(() => {
+        const fetchActivationStatus = async (): Promise<ValidationResponse> => {
+            const response = await axios.get<ValidationResponse>(`${BASE_API_URL}/attendee/validate?short_id=${shortID}`);
+            return response.data;
+        }
         const urlParams = new URLSearchParams(window.location.search);
         const short_id = urlParams.get('short_id');
         if (short_id) {
             setShortID(short_id);
         }
-    }, []);
+        fetchActivationStatus().then((response) => {
+            if (!response.initialised) {
+                navigate(`/activate?short_id=${short_id}&method=${response.method}`);
+            }
+        });
+
+    }, [navigate, shortID]);
 
     const fetchProfile = async () => {
         const visitorId = Cookies.get('visitorId');
@@ -74,6 +93,7 @@ const ProfilePage: React.FC = () => {
             setIsLoading(false);
         }
     };
+
 
     const handlePinSubmit = () => {
         if (pin.length === 4) {
