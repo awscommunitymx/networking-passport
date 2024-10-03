@@ -22,6 +22,7 @@ import axios from 'axios';
 import ProfileItem from "./ProfileItem.tsx";
 import BASE_API_URL from "../base-api.ts";
 import NavBar from "./NavBar.tsx";
+import Cookies from 'js-cookie';
 
 interface Profile {
     first_name: string;
@@ -55,9 +56,10 @@ const ProfilePage: React.FC = () => {
     }, []);
 
     const fetchProfile = async () => {
+        const visitorId = Cookies.get('visitorId');
         setIsLoading(true);
         try {
-            const response = await axios.get<Profile>(`${BASE_API_URL}/attendee?short_id=${shortID}&pin=${pin}`);
+            const response = await axios.get<Profile>(`${BASE_API_URL}/attendee?short_id=${shortID}&pin=${pin}&device=${visitorId}`);
             setProfile(response.data);
             setIsPinModalOpen(false);
         } catch {
