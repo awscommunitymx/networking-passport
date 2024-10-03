@@ -81,6 +81,8 @@ const SearchParticipant: React.FC = () => {
 
 
     const handleSearch = () => {
+        setUrlReady(false);
+        setParticipantData(null);
         navigate(`/search-participant?short_id=${eventCode}`);
     };
 
