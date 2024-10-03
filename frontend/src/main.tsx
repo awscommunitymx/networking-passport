@@ -4,6 +4,7 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import ProfilePage from "./components/ProfilePage.tsx";
 import {ChakraProvider} from "@chakra-ui/react";
 import SponsorLogin from "./components/SponsorLogin.tsx";
+import SearchParticipant from "./components/SearchParticipant.tsx";
 
 const router = createBrowserRouter([
     {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
     {
         path: "/sponsor-login",
         element: <SponsorLogin/>,
+    },
+    {
+        path: "/search-participant",
+        element: <SearchParticipant/>,
     }
 ]);
 

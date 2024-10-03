@@ -1,30 +1,49 @@
-import {useEffect, useState} from "react";
-import {Box, HStack, Text} from "@chakra-ui/react";
-import Cookies from 'js-cookie';
+import React, {useEffect, useState} from 'react';
+import {Box, Button, Flex, Image} from '@chakra-ui/react';
+import {useNavigate} from 'react-router-dom';
 
-const NavBar = () => {
-    const [sponsorName, setSponsorName] = useState<string>('');
-
-    const getSponsorName = async (token: string) => {
-        // TODO: Fetch sponsor name from the server
-        return token;
-    }
+const Navbar: React.FC = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const sponsorToken = Cookies.get('sponsorToken');
-        if (sponsorToken) {
-            getSponsorName(sponsorToken).then((name) => setSponsorName(name))
-        }
-    });
+        const checkLoginStatus = () => {
+            const token = localStorage.getItem('sponsorToken');
+            setIsLoggedIn(!!token);
+        };
+
+        checkLoginStatus();
+        window.addEventListener('storage', checkLoginStatus);
+
+        return () => {
+            window.removeEventListener('storage', checkLoginStatus);
+        };
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('sponsorToken');
+        setIsLoggedIn(false);
+        navigate('/sponsor-login');
+    };
 
     return (
-        <Box bg="blue.500" color="white" p={4}>
-            <HStack spacing={4}>
-                <Text>Vista de patrocinador</Text>
-                <b>{sponsorName}</b>
-            </HStack>
+        <Box position="sticky" top="0" zIndex="sticky">
+            <Box bg="gray.700" px={4}>
+                <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
+                    <Image
+                        src={"https://agenda.awscommunity.mx/_next/static/media/img.d42c5371.png"}
+                        alt={"logo"}
+                        width={200}
+                    />
+                    {isLoggedIn && (
+                        <Button colorScheme="red" onClick={handleLogout}>
+                            Log Out
+                        </Button>
+                    )}
+                </Flex>
+            </Box>
         </Box>
     );
-}
+};
 
-export default NavBar;
+export default Navbar;

@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Box, Button, FormControl, FormLabel, Heading, Input, useToast, VStack} from '@chakra-ui/react';
 import axios from 'axios';
 import BASE_API_URL from "../base-api.ts";
+import {useNavigate} from "react-router-dom";
+import NavBar from "./NavBar.tsx";
 
 interface LoginResponse {
     token: string;
@@ -12,6 +14,14 @@ const SponsorLogin: React.FC = () => {
     const [sponsorKey, setSponsorKey] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const toast = useToast();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('sponsorToken');
+        if (token) {
+            navigate('/search-participant');
+        }
+    }, [navigate]);
 
     const handleLogin = async () => {
         setIsLoading(true);
@@ -30,6 +40,7 @@ const SponsorLogin: React.FC = () => {
                 duration: 3000,
                 isClosable: true,
             });
+            navigate('/search-participant');
         } catch {
             toast({
                 title: 'Login failed',
@@ -44,37 +55,40 @@ const SponsorLogin: React.FC = () => {
     };
 
     return (
-        <Box maxWidth="400px" m={8}>
-            <Heading>
-                Login as Sponsor
-            </Heading>
-            <VStack spacing={4}>
-                <FormControl id="sponsorId" isRequired>
-                    <FormLabel>Sponsor ID</FormLabel>
-                    <Input
-                        type="text"
-                        value={sponsorId}
-                        onChange={(e) => setSponsorId(e.target.value)}
-                    />
-                </FormControl>
-                <FormControl id="sponsorKey" isRequired>
-                    <FormLabel>Sponsor Key</FormLabel>
-                    <Input
-                        type="password"
-                        value={sponsorKey}
-                        onChange={(e) => setSponsorKey(e.target.value)}
-                    />
-                </FormControl>
-                <Button
-                    colorScheme="blue"
-                    width="full"
-                    onClick={handleLogin}
-                    isLoading={isLoading}
-                >
-                    Login
-                </Button>
-            </VStack>
-        </Box>
+        <>
+            <NavBar/>
+            <Box maxWidth="400px" m={8}>
+                <Heading>
+                    Login as Sponsor
+                </Heading>
+                <VStack spacing={4}>
+                    <FormControl id="sponsorId" isRequired>
+                        <FormLabel>Sponsor ID</FormLabel>
+                        <Input
+                            type="text"
+                            value={sponsorId}
+                            onChange={(e) => setSponsorId(e.target.value)}
+                        />
+                    </FormControl>
+                    <FormControl id="sponsorKey" isRequired>
+                        <FormLabel>Sponsor Key</FormLabel>
+                        <Input
+                            type="password"
+                            value={sponsorKey}
+                            onChange={(e) => setSponsorKey(e.target.value)}
+                        />
+                    </FormControl>
+                    <Button
+                        colorScheme="blue"
+                        width="full"
+                        onClick={handleLogin}
+                        isLoading={isLoading}
+                    >
+                        Login
+                    </Button>
+                </VStack>
+            </Box>
+        </>
     );
 };
 
