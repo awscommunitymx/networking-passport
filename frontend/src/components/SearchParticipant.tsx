@@ -70,10 +70,10 @@ const SearchParticipant: React.FC = () => {
         }
 
         const params = new URLSearchParams(location.search);
-        const code = params.get('event_code');
-        if (code && !urlReady) {
-            setEventCode(code);
-            fetchParticipantData(code);
+        const shortId = params.get('short_id');
+        if (shortId && !urlReady) {
+            setEventCode(shortId);
+            fetchParticipantData(shortId);
             setUrlReady(true);
         }
     }, [fetchParticipantData, location]);
