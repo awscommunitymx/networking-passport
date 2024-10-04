@@ -124,7 +124,7 @@ const ActivateProfile = () => {
             setShortID(short_id);
         }
         fetchActivationStatus().then((response) => {
-                if (!response.initialised) {
+                if (!response.initialized) {
                     navigate(`/activate?short_id=${short_id}&method=${response.method}`);
                 }
                 setMethod(response.method);
