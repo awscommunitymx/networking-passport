@@ -166,8 +166,9 @@ const ProfilePage: React.FC = () => {
                                         />
                                     ))}
                                 </VStack>
-                                <Box p={4}>
-                                    <SimpleGrid columns={4} spacing={4}>
+                                <Box>
+                                    <b>Pasaporte digital</b>
+                                    <SimpleGrid columns={2} spacing={2}>
                                         {
                                             [...Array(4)].map((_, index) => (
                                                 <Stamp key={index} stampedIDs={stampedIDs}
