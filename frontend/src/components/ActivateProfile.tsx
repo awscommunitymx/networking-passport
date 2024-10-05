@@ -98,18 +98,21 @@ const ActivateProfile = () => {
     }
 
     const getUnlockKey = async () => {
-        const response = await axios.get(`${BASE_API_URL}//attendee/activate?short_id=${shortID}&value=${unlockValue}`, {});
-        if (response.status !== 200) {
+        console.log("Unlocking profile with value: ", unlockValue);
+        try {
+            const response = await axios.get(`${BASE_API_URL}/attendee/activate?short_id=${shortID}&value=${unlockValue}`, {});
+            setUnlockKey(response.data.unlock_key);
+            prepopulateProfile(response.data.unlock_key);
+        } catch {
             toast({
                 title: 'Error',
-                description: 'La autenticación falló',
+                description: 'El dato ingresado no coincide con el registrado, intenta de nuevo.',
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
             });
+            return;
         }
-        setUnlockKey(response.data.unlock_key);
-        prepopulateProfile(response.data.unlock_key);
     }
 
     useEffect(() => {
