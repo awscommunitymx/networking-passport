@@ -289,7 +289,7 @@ const ActivateProfile = () => {
                             </FormControl>
                             <FormControl isRequired>
                                 <FormLabel>PIN</FormLabel>
-                                <Input name="pin" value={userProfile.pin} onChange={handleInputChange}/>
+                                <Input name="pin" value={userProfile.pin} onChange={handleInputChange} type={"number"}/>
                                 <FormHelperText>
                                     La clave de 4 dígitos que permitirá a otros <i>builders</i> ver tu perfil.
                                 </FormHelperText>
