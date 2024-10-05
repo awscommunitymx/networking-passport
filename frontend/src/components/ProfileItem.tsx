@@ -6,12 +6,29 @@ const ProfileItem: React.FC<{ icon: React.ElementType; label: string; value: str
                                                                                                                   label,
                                                                                                                   value,
                                                                                                                   isLoading
-                                                                                                              }) => (
-    <HStack>
-        <Icon as={icon} color="blue.500"/>
-        <Text fontWeight="bold">{label}:</Text>
-        {isLoading ? <Skeleton height="20px" width="150px"/> : <Text>{value}</Text>}
-    </HStack>
-);
+                                                                                                              }) => {
+    const calculateLink = () => {
+        if (label === "Email") {
+            return `mailto:${value}`;
+        }
+        if (label === "Teléfono") {
+            return `tel:${value}`;
+        }
+        return value;
+    }
+
+    return (
+        <HStack>
+            <Icon as={icon} color="blue.500"/>
+            <Text fontWeight="bold">{label}:</Text>
+            {isLoading ? <Skeleton height="20px" width="150px"/> :
+                <a href={calculateLink()} target="_blank" rel="noreferrer">
+                    <Text>{value}</Text>
+                </a>
+            }
+
+        </HStack>
+    )
+};
 
 export default ProfileItem;

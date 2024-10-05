@@ -17,7 +17,7 @@ import {
     useToast,
     VStack
 } from '@chakra-ui/react';
-import {BriefcaseIcon, DownloadIcon, GlobeIcon, LinkedinIcon, Mail} from 'lucide-react';
+import {DownloadIcon, GlobeIcon, LinkedinIcon, Mail} from 'lucide-react';
 import axios from 'axios';
 import ProfileItem from "./ProfileItem.tsx";
 import BASE_API_URL from "../base-api.ts";
@@ -127,13 +127,14 @@ const ProfilePage: React.FC = () => {
                     >
                         {profile ? (
                             <>
-                                <Heading size="xl"
-                                         textAlign="center">{`${profile.first_name} ${profile.last_name}`}</Heading>
-                                <Text fontSize="lg" color="gray.500" textAlign="center">{profile.role}</Text>
+                                <VStack>
+                                    <Heading size="xl"
+                                             textAlign="center">{`${profile.first_name} ${profile.last_name}`}</Heading>
+                                    <Text fontSize="lg" color="gray.500" textAlign="center">{profile.role}</Text>
+                                    <Text fontSize="lg" color="gray.500" textAlign="center">{profile.company}</Text>
+                                </VStack>
                                 <Divider/>
                                 <VStack align="stretch" spacing={4}>
-                                    <ProfileItem icon={BriefcaseIcon} label="Compañia" value={profile.company}
-                                                 isLoading={isLoading}/>
                                     {profile.email && (
                                         <ProfileItem icon={Mail} label="Email" value={profile.email}
                                                      isLoading={isLoading}/>
