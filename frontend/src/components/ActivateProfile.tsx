@@ -3,11 +3,14 @@ import {
     Button,
     Container,
     FormControl,
+    FormHelperText,
     FormLabel,
     Heading,
     HStack,
     IconButton,
     Input,
+    InputGroup,
+    InputLeftElement,
     Modal,
     ModalBody,
     ModalContent,
@@ -25,7 +28,7 @@ import {ValidationResponse} from "../types/validation.ts";
 import BASE_API_URL from "../base-api.ts";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-import {AddIcon, DeleteIcon} from '@chakra-ui/icons';
+import {AddIcon, DeleteIcon, PhoneIcon} from '@chakra-ui/icons';
 
 interface SocialLink {
     name: string;
@@ -41,6 +44,7 @@ interface ProfileData {
     last_name: string;
     role: string;
     social_links: SocialLink[];
+    gender: string;
 }
 
 interface UserProfile {
@@ -59,11 +63,43 @@ interface UserProfile {
     first_name: string;
     last_name: string;
     role: string;
+    profile: string;
 }
 
-const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"];
+const genderMap = new Map<string, string>([
+    ['male', 'Hombre'],
+    ['female', "Mujer"],
+    ['other', "Otro"],
+]);
+
+const areaOfInterestOptions = [
+    "Arquitectura en la nube",
+    "DevOps y CI/CD",
+    "Serverless",
+    "Machine Learning / IA",
+    "Big Data y análisis de datos",
+    "Contenedores y orquestación",
+    "Seguridad en la nube",
+    "IoT (Internet de las cosas)",
+    "Redes y entrega de contenido",
+    "Blockchain",
+    "Computación de alto rendimiento (HPC)",
+    "Migración a la nube",
+    "Desarrollo de aplicaciones móviles y web",
+    "FinOps y optimización de costos",
+    "Bases de datos"
+];
+
+const profiles = [
+    "Estudiante",
+    "Ingeniero/a con 3 o menos años de experiencia",
+    "Ingeniero/a con más de 3 años de experiencia",
+    "Buscando reconvertir mi carrera",
+    "Otro perfil"
+];
+
+const genderOptions = ["Hombre", "Mujer", "Otro"];
 const ageRangeOptions = ["18-24", "25-34", "35-44", "45-54", "55+"];
-const areaOfInterestOptions = ["Technology", "Business", "Healthcare", "Education", "Arts", "Other"];
 
 const ActivateProfile = () => {
     const [shortID, setShortID] = useState('');
@@ -78,6 +114,7 @@ const ActivateProfile = () => {
 
     const prepopulateProfile = async (unlockKey: string) => {
         const response = await axios.get<ProfileData>(`${BASE_API_URL}/attendee?short_id=${shortID}&unlock_key=${unlockKey}`);
+        console.log(response.data)
         setUserProfile({
             short_id: shortID,
             unlock_key: unlockKey,
@@ -88,12 +125,13 @@ const ActivateProfile = () => {
             share_phone: false,
             pin: '',
             social_links: response.data.social_links,
-            gender: '',
+            gender: genderMap.get(response.data.gender) || response.data.gender,
             age_range: '',
             area_of_interest: '',
             first_name: response.data.first_name,
             last_name: response.data.last_name,
-            role: response.data.role
+            role: response.data.role,
+            profile: ''
         });
     }
 
@@ -192,8 +230,8 @@ const ActivateProfile = () => {
     return (
         <>
             <NavBar/>
-            <Container maxW="container.md">
-                <Heading mb={6}>Activate Profile</Heading>
+            <Container maxW="container.md" mt={5}>
+                <Heading mb={6}>Activar perfil</Heading>
                 <Modal isOpen={unlockKey === ""} onClose={() => {
                 }}>
                     <ModalOverlay/>
@@ -220,35 +258,41 @@ const ActivateProfile = () => {
                     <form onSubmit={handleSubmit}>
                         <VStack spacing={4} align="stretch">
                             <FormControl>
-                                <FormLabel>Name</FormLabel>
-                                <Text>{`${userProfile.first_name} ${userProfile.last_name}`}</Text>
+                                <FormLabel>Nombre</FormLabel>
+                                <Input isDisabled={true} value={`${userProfile.first_name} ${userProfile.last_name}`}/>
                             </FormControl>
                             <FormControl>
-                                <FormLabel>Company</FormLabel>
-                                <Text>{userProfile.company}</Text>
+                                <FormLabel>Compañia</FormLabel>
+                                <Input isDisabled={true} value={userProfile.company}/>
                             </FormControl>
                             <FormControl>
-                                <FormLabel>Role</FormLabel>
-                                <Text>{userProfile.role}</Text>
+                                <FormLabel>Rol</FormLabel>
+                                <Input isDisabled={true} value={userProfile.role}/>
                             </FormControl>
                             <FormControl>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Correo electrónico</FormLabel>
                                 <Input name="email" value={userProfile.email} onChange={handleInputChange}/>
-                            </FormControl>
-                            <FormControl>
-                                <FormLabel>Phone</FormLabel>
-                                <Input name="phone" value={userProfile.phone} onChange={handleInputChange}/>
                             </FormControl>
                             <FormControl display="flex" alignItems="center">
                                 <FormLabel htmlFor="share_email" mb="0">
-                                    Share Email
+                                    Compartir correo electrónico
                                 </FormLabel>
                                 <Switch id="share_email" name="share_email" isChecked={userProfile.share_email}
                                         onChange={handleInputChange}/>
                             </FormControl>
+                            <FormControl>
+                                <FormLabel>Número de celular</FormLabel>
+                                <InputGroup>
+                                    <InputLeftElement pointerEvents='none'>
+                                        <PhoneIcon color='gray.300'/>
+                                    </InputLeftElement>
+                                    <Input type="tel" name="phone" value={userProfile.phone}
+                                           onChange={handleInputChange}/>
+                                </InputGroup>
+                            </FormControl>
                             <FormControl display="flex" alignItems="center">
                                 <FormLabel htmlFor="share_phone" mb="0">
-                                    Share Phone
+                                    Compartir número de celular
                                 </FormLabel>
                                 <Switch id="share_phone" name="share_phone" isChecked={userProfile.share_phone}
                                         onChange={handleInputChange}/>
@@ -256,31 +300,45 @@ const ActivateProfile = () => {
                             <FormControl>
                                 <FormLabel>PIN</FormLabel>
                                 <Input name="pin" value={userProfile.pin} onChange={handleInputChange}/>
+                                <FormHelperText>
+                                    La clave de 4 dígitos que permitirá a otros <i>builders</i> ver tu perfil.
+                                </FormHelperText>
                             </FormControl>
                             <FormControl>
-                                <FormLabel>Gender</FormLabel>
+                                <FormLabel>Género</FormLabel>
                                 <Select name="gender" value={userProfile.gender} onChange={handleInputChange}>
-                                    <option value="">Select Gender</option>
+                                    <option value="">Selecciona tu género</option>
                                     {genderOptions.map(option => (
                                         <option key={option} value={option}>{option}</option>
                                     ))}
                                 </Select>
                             </FormControl>
                             <FormControl>
-                                <FormLabel>Age Range</FormLabel>
+                                <FormLabel>Rango de edad</FormLabel>
                                 <Select name="age_range" value={userProfile.age_range} onChange={handleInputChange}>
-                                    <option value="">Select Age Range</option>
+                                    <option value="">Selecciona tu rango de edad</option>
                                     {ageRangeOptions.map(option => (
                                         <option key={option} value={option}>{option}</option>
                                     ))}
                                 </Select>
                             </FormControl>
                             <FormControl>
-                                <FormLabel>Area of Interest</FormLabel>
+                                <FormLabel>Áreas de mayor interés</FormLabel>
                                 <Select name="area_of_interest" value={userProfile.area_of_interest}
                                         onChange={handleInputChange}>
-                                    <option value="">Select Area of Interest</option>
+                                    <option value="">
+                                        Selecciona tus área de mayor interés
+                                    </option>
                                     {areaOfInterestOptions.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl>
+                                <FormLabel>Perfil</FormLabel>
+                                <Select name="profile" value={userProfile.profile} onChange={handleInputChange}>
+                                    <option value="">Selecciona tu perfil</option>
+                                    {profiles.map(option => (
                                         <option key={option} value={option}>{option}</option>
                                     ))}
                                 </Select>
