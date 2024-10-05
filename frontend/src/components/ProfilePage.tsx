@@ -86,7 +86,7 @@ const ProfilePage: React.FC = () => {
         } catch {
             toast({
                 title: 'Error',
-                description: 'Failed to fetch profile. Please check your PIN and try again.',
+                description: 'No se pudo encontrar el perfil con el PIN proporcionado.',
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
