@@ -195,17 +195,18 @@ const ActivateProfile = () => {
                 }}>
                     <ModalOverlay/>
                     <ModalContent>
-                        <ModalHeader>Autenticate para inicializar este perfil</ModalHeader>
+                        <ModalHeader>Autentícate para inicializar este perfil</ModalHeader>
                         <ModalBody>
-                            <p>Para inicializar este perfil, necesitas autenticarte.</p>
+                            <p>Para poder compartir tus datos con otros <i>builders</i>, es necesario confirmarlos.</p>
                             <p>Ingresa tu
-                                correo {method === "both" && "o los úlimos 6 dígitos de tu numero telefónico"}:</p>
+                                correo
+                                electrónico{method === "both" && " o los úlimos 6 dígitos del celular registrado"}:</p>
                             <Input type={"text"} value={unlockValue} onChange={(e) => {
                                 setUnlockValue(e.target.value);
                             }}/>
                         </ModalBody>
                         <ModalFooter>
-                            <Button onClick={getUnlockKey}>
+                            <Button onClick={getUnlockKey} colorScheme="teal">
                                 Inicializar
                             </Button>
                         </ModalFooter>
