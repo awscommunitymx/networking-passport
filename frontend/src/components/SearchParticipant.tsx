@@ -48,7 +48,7 @@ const SearchParticipant: React.FC = () => {
         setIsLoading(true);
         try {
             const response = await axios.get<ParticipantData>(
-                `${BASE_API_URL}/sponsor/passport?short_id=${code}&jwt=${token}`
+                `${BASE_API_URL}/sponsor/passport?short_id=${code.toUpperCase()}&jwt=${token}`
             );
             setParticipantData(response.data);
             setNotes(response.data.notes || '');
