@@ -202,7 +202,7 @@ const ActivateProfile = () => {
                                 correo
                                 electrónico{method === "both" && " o los úlimos 6 dígitos del celular registrado"}:</p>
                             <Input type={"text"} value={unlockValue} onChange={(e) => {
-                                setUnlockValue(e.target.value);
+                                setUnlockValue(e.target.value.toLowerCase());
                             }}/>
                         </ModalBody>
                         <ModalFooter>
