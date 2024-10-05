@@ -6,8 +6,6 @@ import {
     FormHelperText,
     FormLabel,
     Heading,
-    HStack,
-    IconButton,
     Input,
     InputGroup,
     InputLeftElement,
@@ -19,7 +17,6 @@ import {
     ModalOverlay,
     Select,
     Switch,
-    Text,
     useToast,
     VStack
 } from "@chakra-ui/react";
@@ -28,7 +25,9 @@ import {ValidationResponse} from "../types/validation.ts";
 import BASE_API_URL from "../base-api.ts";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-import {AddIcon, DeleteIcon, PhoneIcon} from '@chakra-ui/icons';
+import {PhoneIcon} from '@chakra-ui/icons';
+import {availableSocialLinks} from "../types/profile.ts";
+import SocialLinkInput from "./SocialLinkInput.tsx";
 
 interface SocialLink {
     name: string;
@@ -40,6 +39,7 @@ interface ProfileData {
     unlock_key?: string;
     company: string;
     email?: string;
+    phone?: string;
     first_name: string;
     last_name: string;
     role: string;
@@ -101,13 +101,13 @@ const profiles = [
 const genderOptions = ["Hombre", "Mujer", "Otro"];
 const ageRangeOptions = ["18-24", "25-34", "35-44", "45-54", "55+"];
 
+
 const ActivateProfile = () => {
     const [shortID, setShortID] = useState('');
     const [method, setMethod] = useState<'both' | 'email'>('both');
     const [unlockValue, setUnlockValue] = useState('');
     const [unlockKey, setUnlockKey] = useState('');
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-    const [newSocialLink, setNewSocialLink] = useState<SocialLink>({name: '', url: ''});
 
     const navigate = useNavigate();
     const toast = useToast();
@@ -120,11 +120,11 @@ const ActivateProfile = () => {
             unlock_key: unlockKey,
             company: response.data.company,
             email: response.data.email || '',
-            phone: '',
-            share_email: false,
-            share_phone: false,
+            phone: response.data.phone || '',
+            share_email: true,
+            share_phone: true,
             pin: '',
-            social_links: response.data.social_links,
+            social_links: availableSocialLinks.map(link => ({name: link, url: ''})),
             gender: genderMap.get(response.data.gender) || response.data.gender,
             age_range: '',
             area_of_interest: '',
@@ -189,8 +189,8 @@ const ActivateProfile = () => {
         const response = await axios.post(`${BASE_API_URL}/attendee`, userProfile)
         if (response.status === 200) {
             toast({
-                title: 'Success',
-                description: 'Profile saved successfully',
+                title: 'Perfil guardado',
+                description: 'Tu perfil ha sido guardado exitosamente',
                 status: 'success',
                 duration: 3000,
                 isClosable: true,
@@ -199,7 +199,7 @@ const ActivateProfile = () => {
         } else {
             toast({
                 title: 'Error',
-                description: 'Failed to save profile',
+                description: 'Hubo un error al guardar tu perfil, intenta de nuevo.',
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
@@ -207,25 +207,15 @@ const ActivateProfile = () => {
         }
     };
 
-    const handleAddSocialLink = () => {
-        if (newSocialLink.name && newSocialLink.url && userProfile) {
-            setUserProfile({
-                ...userProfile,
-                social_links: [...userProfile.social_links, newSocialLink]
-            });
-            setNewSocialLink({name: '', url: ''});
-        }
-    };
-
-    const handleRemoveSocialLink = (index: number) => {
-        if (userProfile) {
-            const updatedLinks = userProfile.social_links.filter((_, i) => i !== index);
-            setUserProfile({
-                ...userProfile,
-                social_links: updatedLinks
-            });
-        }
-    };
+    const handleSocialLinkChange = (name: string, url: string) => {
+        setUserProfile(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                social_links: prev.social_links.map(link => link.name === name ? {name, url} : link)
+            };
+        });
+    }
 
     return (
         <>
@@ -297,14 +287,14 @@ const ActivateProfile = () => {
                                 <Switch id="share_phone" name="share_phone" isChecked={userProfile.share_phone}
                                         onChange={handleInputChange}/>
                             </FormControl>
-                            <FormControl>
+                            <FormControl isRequired>
                                 <FormLabel>PIN</FormLabel>
                                 <Input name="pin" value={userProfile.pin} onChange={handleInputChange}/>
                                 <FormHelperText>
                                     La clave de 4 dígitos que permitirá a otros <i>builders</i> ver tu perfil.
                                 </FormHelperText>
                             </FormControl>
-                            <FormControl>
+                            <FormControl isRequired>
                                 <FormLabel>Género</FormLabel>
                                 <Select name="gender" value={userProfile.gender} onChange={handleInputChange}>
                                     <option value="">Selecciona tu género</option>
@@ -313,7 +303,7 @@ const ActivateProfile = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                            <FormControl>
+                            <FormControl isRequired>
                                 <FormLabel>Rango de edad</FormLabel>
                                 <Select name="age_range" value={userProfile.age_range} onChange={handleInputChange}>
                                     <option value="">Selecciona tu rango de edad</option>
@@ -322,7 +312,7 @@ const ActivateProfile = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                            <FormControl>
+                            <FormControl isRequired>
                                 <FormLabel>Áreas de mayor interés</FormLabel>
                                 <Select name="area_of_interest" value={userProfile.area_of_interest}
                                         onChange={handleInputChange}>
@@ -334,7 +324,7 @@ const ActivateProfile = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                            <FormControl>
+                            <FormControl isRequired>
                                 <FormLabel>Perfil</FormLabel>
                                 <Select name="profile" value={userProfile.profile} onChange={handleInputChange}>
                                     <option value="">Selecciona tu perfil</option>
@@ -343,37 +333,12 @@ const ActivateProfile = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                            <FormControl>
-                                <FormLabel>Social Links</FormLabel>
+                            <VStack>
                                 {userProfile.social_links.map((link, index) => (
-                                    <HStack key={index} mb={2}>
-                                        <Text>{link.name}: {link.url}</Text>
-                                        <IconButton
-                                            aria-label="Remove social link"
-                                            icon={<DeleteIcon/>}
-                                            onClick={() => handleRemoveSocialLink(index)}
-                                            size="sm"
-                                        />
-                                    </HStack>
+                                    <SocialLinkInput key={index} socialLink={link.name}
+                                                     handleSocialLinkChange={handleSocialLinkChange}/>
                                 ))}
-                                <HStack>
-                                    <Input
-                                        placeholder="Platform"
-                                        value={newSocialLink.name}
-                                        onChange={(e) => setNewSocialLink({...newSocialLink, name: e.target.value})}
-                                    />
-                                    <Input
-                                        placeholder="URL"
-                                        value={newSocialLink.url}
-                                        onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
-                                    />
-                                    <IconButton
-                                        aria-label="Add social link"
-                                        icon={<AddIcon/>}
-                                        onClick={handleAddSocialLink}
-                                    />
-                                </HStack>
-                            </FormControl>
+                            </VStack>
                             <Button type="submit" colorScheme="blue">
                                 Save Profile
                             </Button>

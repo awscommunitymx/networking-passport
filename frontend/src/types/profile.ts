@@ -8,3 +8,10 @@ export interface Profile {
     email?: string;
     phone?: string;
 }
+
+export const availableSocialLinks = [
+    "LinkedIn",
+    "Twitter",
+    "GitHub",
+    "Instagram",
+];

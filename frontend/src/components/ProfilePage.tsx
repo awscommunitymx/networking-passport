@@ -156,15 +156,17 @@ const ProfilePage: React.FC = () => {
                                         <ProfileItem icon={Mail} label="Teléfono" value={profile.phone}
                                                      isLoading={isLoading}/>
                                     )}
-                                    {profile.social_links.map((link, index) => (
-                                        <ProfileItem
-                                            key={index}
-                                            icon={link.name === 'LinkedIn' ? LinkedinIcon : GlobeIcon}
-                                            label={link.name}
-                                            value={link.url}
-                                            isLoading={isLoading}
-                                        />
-                                    ))}
+                                    {profile.social_links
+                                        .filter(link => link.url !== "")
+                                        .map((link, index) => (
+                                            <ProfileItem
+                                                key={index}
+                                                icon={link.name === 'LinkedIn' ? LinkedinIcon : GlobeIcon}
+                                                label={link.name}
+                                                value={link.url}
+                                                isLoading={isLoading}
+                                            />
+                                        ))}
                                 </VStack>
                                 <Box>
                                     <b>Pasaporte digital</b>

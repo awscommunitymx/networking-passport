@@ -20,7 +20,16 @@ const ProfileItem: React.FC<{ icon: React.ElementType; label: string; value: str
 
     const calculateValue = () => {
         if (label === "LinkedIn") {
-            return value.replace("https://www.linkedin.com", "");
+            return value.replace("https://linkedin.com", "");
+        }
+        if (label === "GitHub") {
+            return value.replace("https://github.com/", "@");
+        }
+        if (label === "Twitter") {
+            return value.replace("https://twitter.com/", "@");
+        }
+        if (label === "Instagram") {
+            return value.replace("https://instagram.com/", "@");
         }
         return value;
     }
@@ -30,7 +39,6 @@ const ProfileItem: React.FC<{ icon: React.ElementType; label: string; value: str
             <Icon as={icon} color="blue.500"/>
             <Text fontWeight="bold">{label}:</Text>
             {isLoading ? <Skeleton height="20px" width="150px"/> :
-                // <a href={calculateLink()} target="_blank" rel="noreferrer">
                 <Link href={calculateLink()} isExternal>
                     <Flex wrap={"wrap"}>
                         {calculateValue()}
