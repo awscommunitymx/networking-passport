@@ -161,16 +161,19 @@ const ActivateProfile = () => {
 
         const urlParams = new URLSearchParams(window.location.search);
         const short_id = urlParams.get('short_id');
+        console.log("Short id" + short_id);
         if (short_id) {
             setShortID(short_id);
-        }
-        fetchActivationStatus().then((response) => {
-                if (!response.initialized) {
-                    navigate(`/activate?short_id=${short_id}&method=${response.method}`);
+            fetchActivationStatus().then((response) => {
+                    if (!response.initialized) {
+                        navigate(`/activate?short_id=${short_id}&method=${response.method}`);
+                    } else {
+                        navigate(`/view-profile?short_id=${short_id}`);
+                    }
+                    setMethod(response.method);
                 }
-                setMethod(response.method);
-            }
-        );
+            );
+        }
     }, [navigate, shortID]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
