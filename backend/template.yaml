@@ -137,6 +137,25 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref DynamoDBTable
+  CheckExistenceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: check_existence.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        CheckExistenceEvent:
+          Type: Api
+          Properties:
+            Path: /attendee/validate
+            Method: GET
+      Environment:
+        Variables:
+          INDEX_NAME: !Ref ShortIdGSIName
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBTable
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
