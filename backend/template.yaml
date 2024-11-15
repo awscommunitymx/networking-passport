@@ -1,9 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  backend
-
-  Powertools example
+  Backend for the AWS Community Day networking app
 
 Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
   Function:
@@ -15,9 +13,54 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+        POWERTOOLS_METRICS_NAMESPACE: Powertools
+        LOG_LEVEL: INFO
+        DYANMODB_TABLE_NAME: !Ref DynamoDBTable
+    Tags:
+      LambdaPowertools: python
   Api:
     TracingEnabled: true
 Resources:
+  DynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: !Sub '${AWS::StackName}-table'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: short_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: ShortIdGSI
+          KeySchema:
+            - AttributeName: short_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: InvertedGSI
+          KeySchema:
+            - AttributeName: SK
+              KeyType: HASH
+            - AttributeName: PK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Environment
+          Value: !Ref 'AWS::StackName'
+            
+
   HelloWorldFunction:
     Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
     Properties:
@@ -34,11 +77,6 @@ Resources:
             Path: /hello
             Method: GET
              # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
-      Environment:
-        Variables:
-          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
-          POWERTOOLS_METRICS_NAMESPACE: Powertools
-          LOG_LEVEL: INFO
       Tags:
         LambdaPowertools: python
 
