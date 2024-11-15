@@ -256,11 +256,11 @@ const ActivateProfile = () => {
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Compañia</FormLabel>
-                                <Input isDisabled={true} value={userProfile.company}/>
+                                <Input name="company" value={userProfile.company} onChange={handleInputChange}/>
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Rol</FormLabel>
-                                <Input isDisabled={true} value={userProfile.role}/>
+                                <Input name="role" value={userProfile.role} onChange={handleInputChange}/>
                             </FormControl>
                             <FormControl>
                                 <FormLabel>Correo electrónico</FormLabel>

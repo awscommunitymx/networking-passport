@@ -20,6 +20,7 @@ def lambda_handler(event, context):
         short_id = body["short_id"]
         unlock_key = body["unlock_key"]
         company = body["company"]
+        role = body["role"]
         email = body["email"]
         phone = body["phone"]
         share_email = body["share_email"]
@@ -65,7 +66,7 @@ def lambda_handler(event, context):
         dynamodb.update_item(
             TableName=table_name,
             Key={"PK": item["PK"], "SK": item["SK"]},
-            UpdateExpression="SET contact_information.email = :email, \
+            UpdateExpression="SET contact_information.email = :email, company = :company, #r = :role, \
                              contact_information.phone = :phone, contact_information.share_email = :share_email, \
                              contact_information.share_phone = :share_phone, pin = :pin, social_links = :social_links, \
                              gender = :gender, profile = :profile, age_range = :age_range, area_of_interest = :area_of_interest, \
@@ -84,7 +85,10 @@ def lambda_handler(event, context):
                     {"S": area_of_interest} if area_of_interest else {"NULL": True}
                 ),
                 ":initialized": {"BOOL": True},
+                ":company": {"S": company},
+                ":role": {"S": role},
             },
+            ExpressionAttributeNames={"#r": "role"},
         )
 
         return generate_http_response(200, {"message": "Profile updated successfully"})

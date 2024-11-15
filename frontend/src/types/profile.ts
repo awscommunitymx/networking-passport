@@ -11,7 +11,6 @@ export interface Profile {
 
 export const availableSocialLinks = [
     "LinkedIn",
-    "Twitter",
     "GitHub",
     "Instagram",
 ];
