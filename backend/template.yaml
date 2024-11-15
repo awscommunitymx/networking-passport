@@ -27,7 +27,7 @@ Globals:
         POWERTOOLS_SERVICE_NAME: PowertoolsCommunityDay
         POWERTOOLS_METRICS_NAMESPACE: Powertools
         LOG_LEVEL: INFO
-        DYANMODB_TABLE_NAME: !Ref DynamoDBTable
+        DYNAMODB_TABLE_NAME: !Ref DynamoDBTable
     Tags:
       LambdaPowertools: python
   Api:
@@ -69,10 +69,26 @@ Resources:
         - Key: Environment
           Value: !Ref 'AWS::StackName'
   CountLegitimateScans:
-    # SQS
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub '${AWS::StackName}-count-legitimate-scans'
+      Tags:
+        - Key: Environment
+          Value: !Ref 'AWS::StackName'
+  BadgeAttendeesFifo:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${AWS::StackName}-badge-attendees.fifo'
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      Tags:
+        - Key: Environment
+          Value: !Ref 'AWS::StackName'
+  EventbriteSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}-eventbrite-secret'
+      Description: Secret for Eventbrite API
       Tags:
         - Key: Environment
           Value: !Ref 'AWS::StackName'
@@ -215,7 +231,30 @@ Resources:
       Policies: 
         - DynamoDBReadPolicy:
             TableName: !Ref DynamoDBTable
-    
+  EventbriteWebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: eventbrite_webhook.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        EventbriteWebhookEvent:
+          Type: Api
+          Properties:
+            Path: /eventbrite/webhook
+            Method: POST
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref BadgeAttendeesFifo
+          SECRET_NAME: !Ref EventbriteSecret
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt  BadgeAttendeesFifo.QueueName
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref EventbriteSecret
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable  
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
