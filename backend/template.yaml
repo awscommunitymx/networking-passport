@@ -68,7 +68,14 @@ Resources:
       Tags:
         - Key: Environment
           Value: !Ref 'AWS::StackName'
-            
+  CountLegitimateScans:
+    # SQS
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${AWS::StackName}-count-legitimate-scans'
+      Tags:
+        - Key: Environment
+          Value: !Ref 'AWS::StackName'
 
   UpdateFunction:
     Type: AWS::Serverless::Function
@@ -89,7 +96,28 @@ Resources:
       Policies: 
         - DynamoDBCrudPolicy:
             TableName: !Ref DynamoDBTable
-      
+  GetInformationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: get_information.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        GetInformationEvent:
+          Type: Api
+          Properties:
+            Path: /attendee
+            Method: GET
+      Environment:
+        Variables:
+          INDEX_NAME: !Ref ShortIdGSIName
+          QUEUE_URL: !Ref CountLegitimateScans
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !Ref CountLegitimateScans
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBTable
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
