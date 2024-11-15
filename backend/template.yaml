@@ -180,6 +180,25 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref DynamoDBTable
+  StampPassportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: stamp_passport.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        StampPassportEvent:
+          Type: Api
+          Properties:
+            Path: /sponsor/passport
+            Method: POST
+      Environment:
+        Variables:
+          INDEX_NAME: !Ref ShortIdGSIName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
     
 
   ApplicationResourceGroup:
