@@ -10,7 +10,7 @@ import os
 # Inicializar el cliente de DynamoDB
 dynamodb = boto3.client('dynamodb')
 
-table_name = os.environ.get('TABLE_NAME')
+table_name = os.environ.get('DYNAMODB_TABLE_NAME')
 
 # Clave secreta para firmar el JWT (debería almacenarse de forma segura)
 SECRET_KEY = "my_super_secret_key"

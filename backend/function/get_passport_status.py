@@ -6,7 +6,7 @@ import os
 # Inicializar cliente de DynamoDB
 dynamodb = boto3.client('dynamodb')
 
-table_name = os.environ.get('TABLE_NAME')
+table_name = os.environ.get('DYNAMODB_TABLE_NAME')
 index_name = os.environ.get('INDEX_NAME')
 
 # Función para consultar los sellos que un asistente ya tiene

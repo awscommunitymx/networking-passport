@@ -7,7 +7,7 @@ import os
 dynamodb = boto3.client('dynamodb')
 
 # Definir el nombre de la tabla
-table_name = os.environ.get('TABLE_NAME')
+table_name = os.environ.get('DYNAMODB_TABLE_NAME')
 index_name = os.environ.get('INDEX_NAME')
 
 def lambda_handler(event, context):

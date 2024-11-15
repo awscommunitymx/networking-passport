@@ -9,7 +9,7 @@ dynamodb = boto3.client('dynamodb')
 sqs = boto3.client('sqs')
 
 # Definir el nombre de la tabla y el índice global secundario (GSI)
-table_name = os.environ.get('TABLE_NAME')
+table_name = os.environ.get('DYNAMODB_TABLE_NAME')
 index_name = os.environ.get('INDEX_NAME')
 queue_url = os.environ.get('QUEUE_URL')
 
