@@ -3,19 +3,28 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   Backend for the AWS Community Day networking app
 
-Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+Parameters:
+  ShortIdGSIName:
+    Type: String
+    Default: ShortIdGSI
+    Description: Name of the Short ID Global Secondary Index
+  InvertedGSIName:
+    Type: String
+    Default: InvertedGSI
+    Description: Name of the Inverted Global Secondary Index
+Globals:
   Function:
+    CodeUri: function
     Timeout: 5
     MemorySize: 128
     Runtime: python3.12
 
     Tracing: Active
-    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
     Environment:
       Variables:
-        POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+        POWERTOOLS_SERVICE_NAME: PowertoolsCommunityDay
         POWERTOOLS_METRICS_NAMESPACE: Powertools
         LOG_LEVEL: INFO
         DYANMODB_TABLE_NAME: !Ref DynamoDBTable
@@ -42,13 +51,13 @@ Resources:
         - AttributeName: SK
           KeyType: RANGE
       GlobalSecondaryIndexes:
-        - IndexName: ShortIdGSI
+        - IndexName: !Ref ShortIdGSIName
           KeySchema:
             - AttributeName: short_id
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-        - IndexName: InvertedGSI
+        - IndexName: !Ref InvertedGSIName
           KeySchema:
             - AttributeName: SK
               KeyType: HASH
@@ -61,24 +70,26 @@ Resources:
           Value: !Ref 'AWS::StackName'
             
 
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+  UpdateFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      Handler: app.lambda_handler
-      CodeUri: function
-      Description: Hello World function
+      Handler: update_fields.lambda_handler
       Architectures:
       - x86_64
       Tracing: Active
       Events:
-        HelloPath:
-          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+        UpdateEvent:
+          Type: Api
           Properties:
-            Path: /hello
-            Method: GET
-             # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
-      Tags:
-        LambdaPowertools: python
+            Path: /attendee
+            Method: POST
+      Environment:
+        Variables:
+          INDEX_NAME: !Ref ShortIdGSIName
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
+      
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
@@ -93,12 +104,3 @@ Resources:
       ResourceGroupName:
         Ref: ApplicationResourceGroup
       AutoConfigurationEnabled: 'true'
-Outputs:
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod environment for Hello World Function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
-
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value: !GetAtt HelloWorldFunction.Arn
-
