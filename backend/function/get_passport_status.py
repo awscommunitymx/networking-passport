@@ -39,7 +39,7 @@ def lambda_handler(event, context):
 
         # Obtener todos los sellos que tiene el asistente consultando por PK
         response_stamps = dynamodb.query(
-            TableName='communitydaymx24',
+            TableName=table_name,
             KeyConditionExpression='PK = :pk AND begins_with(SK, :prefix)',
             ExpressionAttributeValues={
                 ':pk': {'S': f"USER#{user_id}"},
