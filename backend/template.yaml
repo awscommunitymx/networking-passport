@@ -118,6 +118,25 @@ Resources:
             QueueName: !Ref CountLegitimateScans
         - DynamoDBReadPolicy:
             TableName: !Ref DynamoDBTable
+  UnlockActivationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: unlock_activation.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        UnlockActivationEvent:
+          Type: Api
+          Properties:
+            Path: /attendee/activate
+            Method: GET
+      Environment:
+        Variables:
+          INDEX_NAME: !Ref ShortIdGSIName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
