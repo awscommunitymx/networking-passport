@@ -156,6 +156,26 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref DynamoDBTable
+  GetPassportStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: get_passport_status.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        GetPassportStatusEvent:
+          Type: Api
+          Properties:
+            Path: /attendee/passport
+            Method: GET
+      Environment:
+        Variables:
+          INDEX_NAME: !Ref ShortIdGSIName
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBTable
+            
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
