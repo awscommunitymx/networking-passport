@@ -16,6 +16,7 @@ simplejson = "^3.19.3"
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
 pydantic-to-typescript2 = "^1.0.6"
+boto3-stubs = "^1.35.61"
 
 [build-system]
 requires = ["poetry-core"]
