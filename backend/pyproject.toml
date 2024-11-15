@@ -4,11 +4,13 @@ version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 boto3 = "^1.35.29"
-aws-lambda-powertools = {extras = ["tracer"], version = "^3.0.0"}
+aws-lambda-powertools = { extras = ["tracer"], version = "^3.0.0" }
+simplejson = "^3.19.3"
 
 
 [tool.poetry.group.dev.dependencies]
