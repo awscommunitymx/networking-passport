@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializar el cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -63,11 +64,7 @@ def lambda_handler(event, context):
         body = json.loads(event["body"])
 
         if "sponsor_id" not in body or "sponsor_key" not in body:
-            return {
-                "statusCode": 400,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Missing id_sponsor or key"}),
-            }
+            return generate_http_response(400, {"error": "Missing id_sponsor or key"})
 
         sponsor_id = body["sponsor_id"]
         sponsor_key = body["sponsor_key"]
@@ -82,21 +79,13 @@ def lambda_handler(event, context):
 
         # Verificar si el sponsor existe
         if "Item" not in response:
-            return {
-                "statusCode": 404,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Sponsor not found"}),
-            }
+            return generate_http_response(404, {"error": "Sponsor not found"})
 
         sponsor = response["Item"]
 
         # Verificar si la key proporcionada coincide
         if sponsor["key"]["S"] != sponsor_key:
-            return {
-                "statusCode": 403,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Invalid key sponsor"}),
-            }
+            return generate_http_response(403, {"error": "Invalid sponsor key"})
 
         # Obtener sponsor_id y sponsor_name
         sponsor_id = sponsor["sponsor_id"]["S"]
@@ -106,23 +95,11 @@ def lambda_handler(event, context):
         token = jwt(sponsor_id, sponsor_name, SECRET_KEY)
 
         # Devolver el JWT
-        return {
-            "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"token": token}),
-        }
+        return generate_http_response(200, {"token": token})
 
     except ClientError as e:
         print(f"Error accessing DynamoDB: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error accessing DynamoDB"}),
-        }
+        return generate_http_response(500, {"error": "Error accessing DynamoDB"})
     except Exception as e:
         print(f"Error generating token: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error generating token"}),
-        }
+        return generate_http_response(500, {"error": "Error generating token"})

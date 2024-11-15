@@ -1,8 +1,8 @@
-import json
 import os
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializamos el cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -17,11 +17,7 @@ def lambda_handler(event, context):
     try:
         short_id = event["queryStringParameters"]["short_id"]
     except KeyError:
-        return {
-            "statusCode": 400,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "short_id is required"}),
-        }
+        return generate_http_response(400, {"error": "short_id is required"})
 
     try:
         # Realizamos el query usando el índice global secundario (GSI)
@@ -34,11 +30,7 @@ def lambda_handler(event, context):
 
         # Revisar si el ítem existe
         if "Items" not in response or len(response["Items"]) == 0:
-            return {
-                "statusCode": 404,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "short_id not found"}),
-            }
+            return generate_http_response(404, {"error": "short_id not found"})
 
         # Obtener la información de contacto
         item = response["Items"][
@@ -54,30 +46,18 @@ def lambda_handler(event, context):
 
         # Revisar si tiene tanto celular como correo electrónico
         if email and phone:
-            return {
-                "statusCode": 200,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"method": "both", "initialized": initialized}),
-            }
+            return generate_http_response(
+                200, {"method": "both", "initialized": initialized}
+            )
         elif email:
-            return {
-                "statusCode": 200,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"method": "email", "initialized": initialized}),
-            }
+            return generate_http_response(
+                200, {"method": "email", "initialized": initialized}
+            )
         else:
-            return {
-                "statusCode": 200,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps(
-                    {"error": "no contact method available", "initialized": initialized}
-                ),
-            }
+            return generate_http_response(
+                200, {"method": "phone", "initialized": initialized}
+            )
 
     except ClientError as e:
         print(f"An error occurred: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error accessing DynamoDB"}),
-        }
+        return generate_http_response(500, {"error": "Error accessing DynamoDB"})

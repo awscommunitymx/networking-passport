@@ -1,9 +1,9 @@
 import json
 import os
-import uuid
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializamos el cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -31,11 +31,7 @@ def lambda_handler(event, context):
         age_range = body.get("age_range", None)
         area_of_interest = body.get("area_of_interest", None)
     except (KeyError, json.JSONDecodeError) as e:
-        return {
-            "statusCode": 400,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Invalid input", "details": str(e)}),
-        }
+        return generate_http_response(400, {"error": "Invalid input"})
 
     try:
         # Realizamos el query usando el índice global secundario (GSI)
@@ -48,11 +44,7 @@ def lambda_handler(event, context):
 
         # Revisar si el ítem existe
         if "Items" not in response or len(response["Items"]) == 0:
-            return {
-                "statusCode": 404,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "short_id not found"}),
-            }
+            return generate_http_response(404, {"error": "short_id not found"})
 
         # Obtener el item de DynamoDB
         item = response["Items"][0]
@@ -60,11 +52,7 @@ def lambda_handler(event, context):
 
         # Validar el unlock_key recibido
         if stored_unlock_key != unlock_key:
-            return {
-                "statusCode": 403,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Invalid unlock_key"}),
-            }
+            return generate_http_response(403, {"error": "Invalid unlock_key"})
 
         # Crear el objeto social_links para DynamoDB
         social_links_dynamo = []
@@ -99,18 +87,10 @@ def lambda_handler(event, context):
             },
         )
 
-        return {
-            "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(
-                {"message": "Profile updated successfully and initialized set to true"}
-            ),
-        }
+        return generate_http_response(200, {"message": "Profile updated successfully"})
 
     except ClientError as e:
         print(f"An error occurred: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error accessing or updating DynamoDB"}),
-        }
+        return generate_http_response(
+            500, {"error": "Error accessing or updating DynamoDB"}
+        )

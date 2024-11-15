@@ -3,6 +3,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializamos el cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -22,13 +23,7 @@ def lambda_handler(event, context):
         pin = event["queryStringParameters"].get("pin")
         unlock_key = event["queryStringParameters"].get("unlock_key")
     except KeyError:
-        return {
-            "statusCode": 400,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(
-                {"error": "short_id is required and either pin or unlock_key is needed"}
-            ),
-        }
+        return generate_http_response(400, {"error": "short_id is required"})
 
     try:
         # Query DynamoDB
@@ -40,11 +35,7 @@ def lambda_handler(event, context):
         )
 
         if not response.get("Items"):
-            return {
-                "statusCode": 404,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "short_id not found"}),
-            }
+            return generate_http_response(404, {"error": "short_id not found"})
 
         item = response["Items"][0]
 
@@ -53,17 +44,9 @@ def lambda_handler(event, context):
         stored_unlock_key = item.get("unlock_key", {}).get("S")
 
         if pin and pin != stored_pin:
-            return {
-                "statusCode": 403,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Invalid PIN"}),
-            }
+            return generate_http_response(403, {"error": "Invalid PIN"})
         elif unlock_key and unlock_key != stored_unlock_key:
-            return {
-                "statusCode": 403,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Invalid unlock_key"}),
-            }
+            return generate_http_response(403, {"error": "Invalid unlock_key"})
 
         # Procesar registro SQS
         try:
@@ -167,23 +150,11 @@ def lambda_handler(event, context):
         if phone:
             response_data["phone"] = phone
 
-        return {
-            "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(response_data),
-        }
+        return generate_http_response(200, response_data)
 
     except ClientError as e:
         print(f"DynamoDB error: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error accessing DynamoDB"}),
-        }
+        return generate_http_response(500, {"error": "Error accessing DynamoDB"})
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Unexpected error occurred"}),
-        }
+        return generate_http_response(500, {"error": "Unexpected error occurred"})

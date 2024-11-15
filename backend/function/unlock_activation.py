@@ -4,6 +4,7 @@ import uuid
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializamos el cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -21,11 +22,7 @@ def lambda_handler(event, context):
             "value"
         ]  # Esto puede ser email o últimos 6 dígitos del teléfono
     except KeyError:
-        return {
-            "statusCode": 400,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "short_id and value are required"}),
-        }
+        return generate_http_response(400, {"error": "short_id and value are required"})
 
     try:
         # Realizamos el query usando el índice global secundario (GSI)
@@ -38,11 +35,7 @@ def lambda_handler(event, context):
 
         # Revisar si el ítem existe
         if "Items" not in response or len(response["Items"]) == 0:
-            return {
-                "statusCode": 404,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "short_id not found"}),
-            }
+            return generate_http_response(404, {"error": "short_id not found"})
 
         # Obtener la información de contacto
         item = response["Items"][0]
@@ -66,33 +59,19 @@ def lambda_handler(event, context):
                 )
 
                 # Retornar el unlock_key generado
-                return {
-                    "statusCode": 200,
-                    "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"unlock_key": unlock_key}),
-                }
+                return generate_http_response(200, {"unlock_key": unlock_key})
 
             except ClientError as e:
                 print(f"An error occurred when updating unlock_key: {e}")
-                return {
-                    "statusCode": 500,
-                    "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps(
-                        {"error": "Error updating unlock_key in DynamoDB"}
-                    ),
-                }
+                return generate_http_response(
+                    500, {"error": "Error updating unlock_key in DynamoDB"}
+                )
         else:
             # Si el valor no coincide con el correo o los últimos 6 dígitos del teléfono
-            return {
-                "statusCode": 400,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "Invalid email or phone number"}),
-            }
+            return generate_http_response(
+                400, {"error": "Invalid email or phone number"}
+            )
 
     except ClientError as e:
         print(f"An error occurred: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error accessing DynamoDB"}),
-        }
+        return generate_http_response(500, {"error": "Error accessing DynamoDB"})

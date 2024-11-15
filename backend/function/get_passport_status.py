@@ -3,6 +3,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializar cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -27,11 +28,7 @@ def lambda_handler(event, context):
 
         # Verificar si el usuario existe
         if not response_user["Items"]:
-            return {
-                "statusCode": 404,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"error": "User not found"}),
-            }
+            return generate_http_response(404, {"error": "User not found"})
 
         user_id = response_user["Items"][0]["user_id"]["S"]
 
@@ -47,11 +44,7 @@ def lambda_handler(event, context):
 
         # Si no hay sellos
         if not response_stamps["Items"]:
-            return {
-                "statusCode": 200,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "No stamps yet"}),
-            }
+            return generate_http_response(404, {"error": "No stamps yet"})
 
         # Extraer los sellos
         stamps = []
@@ -63,16 +56,8 @@ def lambda_handler(event, context):
             )
 
         # Devolver los sellos en la respuesta
-        return {
-            "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"stamps": stamps}),
-        }
+        return generate_http_response(200, {"stamps": stamps})
 
     except ClientError as e:
         print(f"Error accessing DynamoDB: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"error": "Error accessing DynamoDB"}),
-        }
+        return generate_http_response(500, {"error": "Error accessing DynamoDB"})

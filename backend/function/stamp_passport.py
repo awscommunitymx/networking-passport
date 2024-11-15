@@ -7,6 +7,7 @@ from datetime import datetime
 
 import boto3
 from botocore.exceptions import ClientError
+from utils import generate_http_response
 
 # Inicializar cliente de DynamoDB
 dynamodb = boto3.client("dynamodb")
@@ -62,25 +63,16 @@ def lambda_handler(event, context):
         short_id = body["short_id"]
         jwt_token = body["jwt"]
     except (KeyError, json.JSONDecodeError) as e:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "Invalid input", "details": str(e)}),
-        }
+        return generate_http_response(400, {"error": "Invalid input"})
 
     # Verificar el JWT y extraer el sponsor_id
     jwt_payload = verify_jwt(jwt_token, SECRET_KEY)
     if jwt_payload is None:
-        return {
-            "statusCode": 403,
-            "body": json.dumps({"error": "Invalid or expired JWT"}),
-        }
+        return generate_http_response(403, {"error": "Invalid or expired JWT"})
 
     sponsor_id = jwt_payload.get("sponsor_id")
     if not sponsor_id:
-        return {
-            "statusCode": 403,
-            "body": json.dumps({"error": "JWT does not contain sponsor_id"}),
-        }
+        return generate_http_response(403, {"error": "JWT does not contain sponsor_id"})
 
     notes = body.get("notes", "")  # Notas opcionales
 
@@ -95,7 +87,7 @@ def lambda_handler(event, context):
 
         # Verificar si el usuario existe
         if not response_user["Items"]:
-            return {"statusCode": 404, "body": json.dumps({"error": "User not found"})}
+            return generate_http_response(404, {"error": "User not found"})
 
         user_id = response_user["Items"][0]["user_id"]["S"]
 
@@ -116,10 +108,9 @@ def lambda_handler(event, context):
                 UpdateExpression="SET notes = :notes",
                 ExpressionAttributeValues={":notes": {"S": notes}},
             )
-            return {
-                "statusCode": 200,
-                "body": json.dumps({"message": "Notes updated successfully"}),
-            }
+            return generate_http_response(
+                200, {"message": "Notes updated successfully"}
+            )
 
         # Si no existe la relación, crearla y guardar las notas
         timestamp = datetime.utcnow().isoformat()
@@ -133,14 +124,10 @@ def lambda_handler(event, context):
             },
         )
 
-        return {
-            "statusCode": 200,
-            "body": json.dumps({"message": "Stamp and notes saved successfully"}),
-        }
+        return generate_http_response(
+            200, {"message": "Stamp and notes saved successfully"}
+        )
 
     except ClientError as e:
         print(f"Error accessing DynamoDB: {e}")
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": "Error accessing DynamoDB"}),
-        }
+        return generate_http_response(500, {"error": "Error accessing DynamoDB"})
