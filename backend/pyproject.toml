@@ -18,6 +18,7 @@ requests = "^2.32.3"
 black = "^24.8.0"
 pydantic-to-typescript2 = "^1.0.6"
 boto3-stubs = "^1.35.61"
+isort = "^5.13.2"
 
 [build-system]
 requires = ["poetry-core"]
