@@ -199,6 +199,22 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref DynamoDBTable
+  CreateSponsorJWTFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: create_sponsor_jwt.lambda_handler
+      Architectures:
+      - x86_64
+      Tracing: Active
+      Events:
+        CreateSponsorJWTEvent:
+          Type: Api
+          Properties:
+            Path: /sponsor/auth
+            Method: POST
+      Policies: 
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBTable
     
 
   ApplicationResourceGroup:
