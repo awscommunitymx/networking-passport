@@ -31,7 +31,7 @@ const Navbar: React.FC = () => {
             <Box bg="gray.700" px={4}>
                 <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
                     <Image
-                        src={"https://agenda.awscommunity.mx/_next/static/media/img.d42c5371.png"}
+                        src={"https://agenda.awscommunity.mx/_next/static/media/img.d6f3c4ee.png"}
                         alt={"logo"}
                         width={200}
                     />
