@@ -25,7 +25,6 @@ interface ParticipantData {
 
 const SearchParticipant: React.FC = () => {
     const [eventCode, setEventCode] = useState<string>('');
-    const [urlReady, setUrlReady] = useState<boolean>(false);
     const [participantData, setParticipantData] = useState<ParticipantData | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -72,13 +71,11 @@ const SearchParticipant: React.FC = () => {
             setEventCode(shortId);
             handleRegisterVisit(token, shortId);
             visitRegistered.current = true;
-            setUrlReady(true);
         }
     }, [location]);
 
 
     const handleSearch = () => {
-        setUrlReady(false);
         setParticipantData(null);
         navigate(`/search-participant?short_id=${eventCode}`);
     };
