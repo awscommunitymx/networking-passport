@@ -8,10 +8,10 @@ Parameters:
     Type: String
     Default: ShortIdGSI
     Description: Name of the Short ID Global Secondary Index
-  InvertedGSIName:
+  DateLSIName:
     Type: String
-    Default: InvertedGSI
-    Description: Name of the Inverted Global Secondary Index
+    Default: DateLSI
+    Description: Name of the Date Local Secondary Index
 Globals:
   Function:
     CodeUri: function
@@ -40,7 +40,7 @@ Resources:
   DynamoDBTable:
     Type: 'AWS::DynamoDB::Table'
     Properties:
-      TableName: !Sub '${AWS::StackName}-table'
+      TableName: !Sub '${AWS::StackName}-db-table'
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: PK
@@ -48,6 +48,8 @@ Resources:
         - AttributeName: SK
           AttributeType: S
         - AttributeName: short_id
+          AttributeType: S
+        - AttributeName: date
           AttributeType: S
       KeySchema:
         - AttributeName: PK
@@ -61,11 +63,11 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-        - IndexName: !Ref InvertedGSIName
+        - IndexName: !Ref DateLSIName
           KeySchema:
-            - AttributeName: SK
-              KeyType: HASH
             - AttributeName: PK
+              KeyType: HASH
+            - AttributeName: date
               KeyType: RANGE
           Projection:
             ProjectionType: ALL

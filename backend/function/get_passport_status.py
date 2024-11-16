@@ -25,6 +25,9 @@ def lambda_handler(event, context):
             KeyConditionExpression="short_id = :sid",
             ExpressionAttributeValues={":sid": {"S": short_id}},
         )
+        print(f"Querying DynamoDB table {table_name} for short_id {short_id} in GSI {index_name}")
+
+        print(f"Response: {response_user}")
 
         # Verificar si el usuario existe
         if not response_user["Items"]:
@@ -32,31 +35,12 @@ def lambda_handler(event, context):
 
         user_id = response_user["Items"][0]["user_id"]["S"]
 
-        # Obtener todos los sellos que tiene el asistente consultando por PK
-        response_stamps = dynamodb.query(
-            TableName=table_name,
-            KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
-            ExpressionAttributeValues={
-                ":pk": {"S": f"USER#{user_id}"},
-                ":prefix": {"S": "SPONSOR#"},
-            },
-        )
-
-        # Si no hay sellos
-        if not response_stamps["Items"]:
-            return generate_http_response(404, {"error": "No stamps yet"})
-
-        # Extraer los sellos
-        stamps = []
-        for item in response_stamps["Items"]:
-            # Accedemos al valor de 'S' en SK antes de llamar a split()
-            sponsor_id = item["SK"]["S"].split("#")[1]
-            stamps.append(
-                {"sponsor_id": sponsor_id, "timestamp": item["timestamp"]["S"]}
-            )
-
-        # Devolver los sellos en la respuesta
-        return generate_http_response(200, {"stamps": stamps})
+        return generate_http_response(200, {
+            "first_name": response_user["Items"][0]["first_name"]["S"],
+            "last_name": response_user["Items"][0]["last_name"]["S"],
+            "role": response_user["Items"][0].get("role", {}).get("S"),
+            "company": response_user["Items"][0].get("company", {}).get("S"),
+        })
 
     except ClientError as e:
         print(f"Error accessing DynamoDB: {e}")

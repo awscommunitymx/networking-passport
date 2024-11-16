@@ -26,8 +26,6 @@ import Cookies from 'js-cookie';
 import {useNavigate} from "react-router-dom";
 import {ValidationResponse} from "../types/validation.ts";
 import {Profile} from "../types/profile.ts";
-import Stamp from "./Stamp.tsx";
-import {SimpleGrid} from "@chakra-ui/icons";
 
 
 const ProfilePage: React.FC = () => {
@@ -41,18 +39,8 @@ const ProfilePage: React.FC = () => {
     const cardBgColor = useColorModeValue('white', 'gray.700');
 
     const [shortID, setShortID] = useState('');
-    const [stampedIDs, setStampedIDs] = useState<string[]>([]);
 
     const navigate = useNavigate();
-
-    const fetchStampedIDs = async () => {
-        const response = await axios.get<string[]>(`${BASE_API_URL}/attendee/passport?short_id=${shortID}`);
-        // @ts-expect-error - stamps is not defined in the response type
-        if (response.data.stamps) {
-            // @ts-expect-error - stamps is not defined in the response type
-            setStampedIDs(response.data.stamps.map(stamp => stamp.sponsor_id));
-        }
-    };
 
 
     useEffect(() => {
@@ -71,7 +59,6 @@ const ProfilePage: React.FC = () => {
                     navigate(`/activate?short_id=${short_id}&method=${response.method}`);
                 }
             });
-            fetchStampedIDs();
         }
 
     }, [navigate, shortID]);
@@ -168,17 +155,6 @@ const ProfilePage: React.FC = () => {
                                             />
                                         ))}
                                 </VStack>
-                                <Box>
-                                    <b>Pasaporte digital</b>
-                                    <SimpleGrid columns={2} spacing={2}>
-                                        {
-                                            [...Array(4)].map((_, index) => (
-                                                <Stamp key={index} stampedIDs={stampedIDs}
-                                                       stampID={(index + 1).toString()}/>
-                                            ))
-                                        }
-                                    </SimpleGrid>
-                                </Box>
                                 <Button
                                     leftIcon={<DownloadIcon/>}
                                     colorScheme="blue"

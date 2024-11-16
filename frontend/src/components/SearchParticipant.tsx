@@ -1,6 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-    Alert,
     Box,
     Button,
     Container,
@@ -9,7 +8,6 @@ import {
     Heading,
     Input,
     Text,
-    Textarea,
     useToast,
     VStack
 } from '@chakra-ui/react';
@@ -21,9 +19,6 @@ import NavBar from "./NavBar.tsx";
 interface ParticipantData {
     first_name: string;
     last_name: string;
-    notes: string;
-    message: string;
-    timestamp: string;
     role: string;
     company: string;
 }
@@ -32,11 +27,11 @@ const SearchParticipant: React.FC = () => {
     const [eventCode, setEventCode] = useState<string>('');
     const [urlReady, setUrlReady] = useState<boolean>(false);
     const [participantData, setParticipantData] = useState<ParticipantData | null>(null);
-    const [notes, setNotes] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const navigate = useNavigate();
     const location = useLocation();
     const toast = useToast();
+    const visitRegistered = useRef(false);
 
     const fetchParticipantData = async (code: string) => {
         const token = localStorage.getItem('sponsorToken');
@@ -51,7 +46,6 @@ const SearchParticipant: React.FC = () => {
                 `${BASE_API_URL}/sponsor/passport?short_id=${code.toUpperCase()}&jwt=${token}`
             );
             setParticipantData(response.data);
-            setNotes(response.data.notes || '');
         } catch {
             toast({
                 title: 'Error',
@@ -74,12 +68,13 @@ const SearchParticipant: React.FC = () => {
 
         const params = new URLSearchParams(location.search);
         const shortId = params.get('short_id');
-        if (shortId && !urlReady) {
+        if (shortId && !visitRegistered.current) {
             setEventCode(shortId);
-            fetchParticipantData(shortId);
+            handleRegisterVisit(token, shortId);
+            visitRegistered.current = true;
             setUrlReady(true);
         }
-    }, [fetchParticipantData, location]);
+    }, [location]);
 
 
     const handleSearch = () => {
@@ -88,8 +83,7 @@ const SearchParticipant: React.FC = () => {
         navigate(`/search-participant?short_id=${eventCode}`);
     };
 
-    const handleRegisterVisit = async () => {
-        const token = localStorage.getItem('sponsorToken');
+    const handleRegisterVisit = async (token: string, eventCode: string) => {
         if (!token) {
             navigate('/sponsor-login');
             return;
@@ -102,12 +96,11 @@ const SearchParticipant: React.FC = () => {
                 {
                     short_id: eventCode,
                     jwt: token,
-                    notes: notes,
                 }
             );
             toast({
                 title: 'Success',
-                description: participantData?.notes ? 'Notes updated' : 'Visit registered',
+                description: 'Visit registered',
                 status: 'success',
                 duration: 3000,
                 isClosable: true,
@@ -116,7 +109,7 @@ const SearchParticipant: React.FC = () => {
         } catch {
             toast({
                 title: 'Error',
-                description: 'Failed to register visit',
+                description: 'Failed to register visit. Maybe the participant has already visited this session?',
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
@@ -153,17 +146,6 @@ const SearchParticipant: React.FC = () => {
 
                         {participantData && (
                             <>
-                                {participantData.message === "Already stamped" && (
-                                    <Alert status="warning">
-                                        <VStack alignItems={"start"}>
-                                            <Text>This participant has already been stamped.</Text>
-                                            {participantData.timestamp && (
-                                                <Text>Last
-                                                    scanned: {new Date(participantData.timestamp).toLocaleString()}</Text>
-                                            )}
-                                        </VStack>
-                                    </Alert>
-                                )}
                                 <Box>
                                     <Text fontSize="xl" fontWeight="bold">
                                         {participantData.first_name} {participantData.last_name}
@@ -173,25 +155,6 @@ const SearchParticipant: React.FC = () => {
                                     </Text>
                                     <Text><b>{participantData.company}</b></Text>
                                 </Box>
-                                <FormControl>
-                                    <FormLabel>
-                                        Notes
-                                        <Text fontSize='xs' color="gray">Enter key details here for follow-up on this
-                                            lead.</Text>
-                                    </FormLabel>
-                                    <Textarea
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        placeholder="Enter notes"
-                                    />
-                                </FormControl>
-                                <Button
-                                    onClick={handleRegisterVisit}
-                                    isLoading={isLoading}
-                                    colorScheme="green"
-                                >
-                                    {participantData.message === "Already stamped" ? "Modify notes" : "Register Visit"}
-                                </Button>
                             </>
                         )}
                     </VStack>

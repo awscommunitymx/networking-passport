@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import boto3
 from botocore.exceptions import ClientError
@@ -54,6 +54,35 @@ def verify_jwt(token, secret_key):
         print(f"Error verifying JWT: {e}")
         return None
 
+def can_register(user_id, sponsor_id):
+    now = datetime.now(timezone.utc)
+    ten_minutes_ago = now - timedelta(minutes=10)
+
+    # Query the latest session for the user with the sponsor
+    response = dynamodb.query(
+        TableName=table_name,
+        KeyConditionExpression="PK = :user_pk AND begins_with(SK, :sponsor_sk)",
+        ExpressionAttributeValues={
+            ":user_pk": {"S": f"USER#{user_id}"},
+            ":sponsor_sk": {"S": f"SPONSOR#{sponsor_id}"},
+        },
+        ScanIndexForward=False,  # Sort in descending order to get the latest session first
+        Limit=1
+    )
+
+    # Check if there is a recent session
+    items = response.get('Items', [])
+    if items:
+        last_session = items[0]
+        last_timestamp = datetime.fromisoformat(last_session['created_at']['S'])
+
+        # Ensure the last session was more than 10 minutes ago
+        if last_timestamp > ten_minutes_ago:
+            return False
+
+    # Otherwise, allow the registration
+    return True
+
 
 # Función para guardar o actualizar el sello y los comentarios
 def lambda_handler(event, context):
@@ -91,36 +120,17 @@ def lambda_handler(event, context):
 
         user_id = response_user["Items"][0]["user_id"]["S"]
 
-        # Buscar si ya existe una relación USER<>SPONSOR
-        response_relation = dynamodb.get_item(
-            TableName=table_name,
-            Key={"PK": {"S": f"USER#{user_id}"}, "SK": {"S": f"SPONSOR#{sponsor_id}"}},
-        )
+        now = datetime.now(timezone.utc).isoformat()
 
-        # Si la relación ya existe, simplemente actualizar las notas
-        if "Item" in response_relation:
-            dynamodb.update_item(
-                TableName=table_name,
-                Key={
-                    "PK": {"S": f"USER#{user_id}"},
-                    "SK": {"S": f"SPONSOR#{sponsor_id}"},
-                },
-                UpdateExpression="SET notes = :notes",
-                ExpressionAttributeValues={":notes": {"S": notes}},
-            )
-            return generate_http_response(
-                200, {"message": "Notes updated successfully"}
-            )
+        if not can_register(user_id, sponsor_id):
+            return generate_http_response(403, {"error": "User already registered"})
 
-        # Si no existe la relación, crearla y guardar las notas
-        timestamp = datetime.utcnow().isoformat()
         dynamodb.put_item(
             TableName=table_name,
             Item={
                 "PK": {"S": f"USER#{user_id}"},
-                "SK": {"S": f"SPONSOR#{sponsor_id}"},
-                "notes": {"S": notes},
-                "timestamp": {"S": timestamp},
+                "SK": {"S": f"SPONSOR#{sponsor_id}#{now}"},
+                "created_at": {"S": now},
             },
         )
 

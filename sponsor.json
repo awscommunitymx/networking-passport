@@ -1,0 +1,20 @@
+{
+    "PK": {
+      "S": "SPONSOR#1"
+    },
+    "SK": {
+      "S": "PROFILE"
+    },
+    "key": {
+      "S": "639ae74b-570d-4903-a3fb-b1bc8ff5af9f"
+    },
+    "required": {
+      "BOOL": true
+    },
+    "sponsor_id": {
+      "S": "1"
+    },
+    "sponsor_name": {
+      "S": "Escenario 1"
+    }
+  }

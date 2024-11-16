@@ -1,0 +1,94 @@
+{
+    "PK": {
+      "S": "USER#1107436069318227929743001"
+    },
+    "SK": {
+      "S": "PROFILE"
+    },
+    "age_range": {
+      "S": "18-24"
+    },
+    "area_of_interest": {
+      "S": "DevOps y CI/CD"
+    },
+    "company": {
+      "S": "Rackspace Technology"
+    },
+    "contact_information": {
+      "M": {
+        "email": {
+          "S": "a01383056@tec.mx"
+        },
+        "phone": {
+          "S": "8443685925"
+        },
+        "share_email": {
+          "BOOL": true
+        },
+        "share_phone": {
+          "BOOL": true
+        }
+      }
+    },
+    "first_name": {
+      "S": "Sebastian"
+    },
+    "gender": {
+      "S": "Hombre"
+    },
+    "initialized": {
+      "BOOL": true
+    },
+    "last_name": {
+      "S": "Marines"
+    },
+    "pin": {
+      "S": "2012"
+    },
+    "profile": {
+      "S": "Ingeniero/a con más de 3 años de experiencia"
+    },
+    "role": {
+      "S": "Senior Cloud Engineer"
+    },
+    "short_id": {
+      "S": "L96I5IU"
+    },
+    "social_links": {
+      "L": [
+        {
+          "M": {
+            "name": {
+              "S": "LinkedIn"
+            },
+            "url": {
+              "S": "https://linkedin.com/in/sebastianmarines"
+            }
+          }
+        },
+        {
+          "M": {
+            "name": {
+              "S": "GitHub"
+            },
+            "url": {
+              "S": "https://github.com/sebastianmarines"
+            }
+          }
+        },
+        {
+          "M": {
+            "name": {
+              "S": "Instagram"
+            },
+            "url": {
+              "S": "https://instagram.com/sebastianmarines"
+            }
+          }
+        }
+      ]
+    },
+    "user_id": {
+      "S": "1107436069318227929743001"
+    }
+  }
